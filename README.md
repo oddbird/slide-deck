@@ -1,51 +1,57 @@
 # `slide-deck`
 
-A Web Component for web presentations
+A Web Component for web presentations.
 
-**⚠️ The rest of this document is boilerplate that needs updating ⚠️**
-
-**[Demo](https://daviddarnes.github.io/component-name/demo.html)** |
-**[Further reading](https://darn.es/web-component-github-starter-template/)**
+**[Demo](https://slide-deck.netlify.com)**
 
 ## Examples
 
 General usage example:
 
 ```html
-<script type="module" src="component-name.js"></script>
+<script type="module" src="slide-deck.js"></script>
 
-<component-name>
-  <button>Button</button>
-</component-name>
+<slide-deck>
+  <header><h1>This is a slide show</h1></header>
+  <div><h2>Each child is a slide</h2></div>
+  <div>
+    <h2>We can add our own controls</h2>
+    <p>Based on event handlers</p>
+    <button slide-event>previous</button>
+    <button slide-event>next</button>
+    <p>Or specifically for changing views</p>
+    <button set-view>grid</button>
+    <button set-view>list</button>
+  </div>
+</slide-deck>
 ```
 
-Example using a fallback method:
+Define a simple fallback view:
 
 ```html
-<script type="module" src="component-name.js"></script>
-
-<component-name>
-  <button>Button</button>
-  <a href="#">Anchor</a>
-</component-name>
 <style>
-  component-name:not(:defined) button,
-  component-name:defined a {
-    display: none;
+  slide-deck:not(:defined) {
+    display: grid;
+
+    > * {
+      border-block-end: thin solid;
+    }
   }
 </style>
 ```
 
-Example using options or additional fallback method:
+Set initial state with attributes,
+or define your own view:
 
 ```html
-<script type="module" src="component-name.js"></script>
+<script type="module" src="slide-deck.js"></script>
 
-<component-name attribute="value">
-  <button>Button</button>
-</component-name>
+<slide-deck key-control slide-view="fancy">
+  <header><h1>Listening for arrow keys</h1></header>
+  <div><h2>And using a fancy view</h2></div>
+</slide-deck>
 <style>
-  component-name[attribute="value"] {
+  slide-deck[slide-view="fancy"] {
     outline: 1px solid red;
   }
 </style>
@@ -55,14 +61,18 @@ Example using options or additional fallback method:
 
 This Web Component allows you to:
 
-- Check for…
+- Create web-based slides
+- Switch between different slide views
+- Control presentations with a remote, or a keyboard
+- Follow along in a second tab (speaker view)
+- Toggle full-screen mode
 
 ## Installation
 
 You have a few options (choose one of these):
 
-1. Install via [npm](https://www.npmjs.com/package/@daviddarnes/component-name): `npm install @daviddarnes/component-name`
-1. [Download the source manually from GitHub](https://github.com/daviddarnes/component-name/releases) into your project.
+1. Install via [npm](https://www.npmjs.com/package/@oddbird/slide-deck): `npm install @oddbird/slide-deck`
+1. [Download the source manually from GitHub](https://github.com/oddbird/slide-deck/releases) into your project.
 1. Skip this step and use the script directly via a 3rd party CDN (not recommended for production use)
 
 ### Usage
@@ -71,14 +81,14 @@ Make sure you include the `<script>` in your project (choose one of these):
 
 ```html
 <!-- Host yourself -->
-<script type="module" src="component-name.js"></script>
+<script type="module" src="slide-deck.js"></script>
 ```
 
 ```html
 <!-- 3rd party CDN, not recommended for production use -->
 <script
   type="module"
-  src="https://www.unpkg.com/@daviddarnes/component-name@1.0.0/component-name.js"
+  src="https://www.unpkg.com/@oddbird/slide-deck@0.1.0/slide-deck.js"
 ></script>
 ```
 
@@ -86,7 +96,7 @@ Make sure you include the `<script>` in your project (choose one of these):
 <!-- 3rd party CDN, not recommended for production use -->
 <script
   type="module"
-  src="https://esm.sh/@daviddarnes/component-name@1.0.0"
+  src="https://esm.sh/@oddbird/slide-deck@0.1.0"
 ></script>
 ```
 
@@ -94,5 +104,20 @@ Make sure you include the `<script>` in your project (choose one of these):
 
 With thanks to the following people:
 
-- [David Darnes](https://zachleat.com) for the
+- [David Darnes](https://darn.es/) for the
   [Web Component repo template](https://github.com/daviddarnes/component-template)
+
+## Support
+
+At OddBird,
+we enjoy collaborating and contributing
+as part of an open web community.
+But those contributions take time and effort.
+If you're interested in supporting our
+open-source work,
+consider becoming a
+[GitHub sponsor](https://github.com/sponsors/oddbird),
+or contributing to our
+[Open Collective](https://opencollective.com/oddbird-open-source).
+
+❤️ Thanks!
