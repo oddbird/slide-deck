@@ -2,7 +2,7 @@
 
 A Web Component for web presentations.
 
-**[Demo](https://slide-deck.netlify.com)**
+**[Demo](https://slide-deck.netlify.app)**
 
 ## Examples
 

@@ -9,9 +9,9 @@ Participation is subject to the
 
 ## Demo page
 
-The `demo.html` page
+The `index.html` page
 is published to
-`https://slide-deck.netlify.com`.
+`https://slide-deck.netlify.app`.
 
 To start a local server
 for testing, run:
@@ -22,5 +22,5 @@ npm start
 ```
 
 Then go to
-http://localhost:8080/demo/
+http://localhost:8080/
 in a web browser.
