@@ -1,8 +1,11 @@
-# `component-name`
+# `slide-deck`
 
-A Web Component for…
+A Web Component for web presentations
 
-**[Demo](https://daviddarnes.github.io/component-name/demo.html)** | **[Further reading](https://darn.es/web-component-github-starter-template/)**
+**⚠️ The rest of this document is boilerplate that needs updating ⚠️**
+
+**[Demo](https://daviddarnes.github.io/component-name/demo.html)** |
+**[Further reading](https://darn.es/web-component-github-starter-template/)**
 
 ## Examples
 
@@ -91,4 +94,5 @@ Make sure you include the `<script>` in your project (choose one of these):
 
 With thanks to the following people:
 
-- [Zach Leatherman](https://zachleat.com) for inspiring this [Web Component repo template](https://github.com/daviddarnes/component-template)
+- [David Darnes](https://zachleat.com) for the
+  [Web Component repo template](https://github.com/daviddarnes/component-template)

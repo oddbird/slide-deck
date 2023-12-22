@@ -1,33 +1,34 @@
 {
-  "name": "@daviddarnes/component-name",
+  "name": "@oddbird/slide-deck",
   "version": "1.0.0",
-  "description": "A Web Component for…",
-  "main": "component-name.js",
+  "description": "A Web Component for web presentations",
+  "main": "slide-deck.js",
   "scripts": {
     "start": "npx http-server ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/daviddarnes/component-name.git"
+    "url": "git+https://github.com/oddbird/slide-deck.git"
   },
   "keywords": [
     "web",
     "component",
     "components",
     "web components",
-    "custom elements"
+    "custom elements",
+    "presentation"
   ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/daviddarnes/component-name/issues"
+    "url": "https://github.com/oddbird/slide-deck/issues"
   },
   "author": {
-    "name": "David Darnes",
-    "email": "me@daviddarnes.com",
-    "url": "https://darn.es/"
+    "name": "Miriam Suzanne",
+    "email": "miriam@oddbird.net",
+    "url": "https://oddbird.net/authors/miriam/"
   },
-  "homepage": "https://github.com/daviddarnes/component-name#readme"
+  "homepage": "https://github.com/oddbird/slide-deck#readme"
 }

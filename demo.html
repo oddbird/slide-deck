@@ -3,37 +3,69 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Demo of component-name Web Component" />
-    <title>component-name Web Component Demo</title>
+    <meta name="description" content="Demo of slide-deck Web Component" />
+    <title>Slide-Deck Web Component Demo</title>
 
-    <script type="module" src="component-name.js"></script>
+    <script type="module" src="slide-deck.js"></script>
   </head>
   <body>
-    <h2>General usage example</h2>
-    <component-name>
-      <button>Button</button>
-    </component-name>
-    <hr />
-    <h2>Example using a fallback method</h2>
-    <component-name>
-      <button>Button</button>
-      <a href="#">Anchor</a>
-    </component-name>
-    <style>
-      component-name:not(:defined) button,
-      component-name:defined a {
-        display: none;
-      }
-    </style>
-    <hr />
-    <h2>Example using options or additional fallback method</h2>
-    <component-name attribute="value">
-      <button>Button</button>
-    </component-name>
-    <style>
-      component-name[attribute="value"] {
-        outline: 1px solid red;
-      }
-    </style>
+    <slide-deck id="my-slides" key-control>
+      <header><h1>Slide-Deck Web Component</h1></header>
+      <div><h2>No Dependencies</h2></div>
+      <div><h2>Progressive Enhancement</h2></div>
+      <div><h2>Just HTML</h2></div>
+      <div><h2>Keyboard Shortcuts</h2></div>
+      <div>
+        <h3>Always available:</h3>
+        <ul>
+          <li><strong>command-k</strong>: control panel</li>
+          <li><strong>command-period</strong>: fullscreen</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Active Presentation:</h3>
+        <ul>
+          <li>
+            <strong>right-arrow</strong>/<strong>page-down</strong>:
+            next slide
+          </li>
+          <li>
+            <strong>left-arrow</strong>/<strong>page-up</strong>:
+            previous slide
+          </li>
+        </ul>
+      </div>
+      <div><h2>Works with Presentation Remotes</h2></div>
+      <div><h2>Add Your Own Controls</h2></div>
+      <div>
+        <h2><code>&lt;button slide-event&gt;previous&lt;button&gt;</code></h2>
+        <div>
+          <button slide-event>previous</button>
+          <button slide-event>next</button>
+          <button slide-event="start">restart</button>
+        </div>
+      </div>
+      <div>
+        <h2><code>&lt;button set-view&gt;list&lt;button&gt;</code></h2>
+        <div>
+          <button set-view>list</button>
+          <button set-view>grid</button>
+        </div>
+      </div>
+      <div><h2>Speaker View</h2></div>
+      <div><h2>Open Source</h2></div>
+      <div>
+        <h3>ToDo: Github Repo</h3>
+        <p>(and NPM package??)</p>
+      </div>
+      <div><h3>ToDo: Full Documentation</h3></div>
+      <div><h3>ToDo: Improved</h3></div>
+      <div><h3>ToDo: Speaker Notes</h3></div>
+      <div><h3>ToDo: Slide Templates</h3></div>
+      <div><h3>ToDo: CSS Themes</h3></div>
+      <div><h3>ToDo: More Shortcuts</h3></div>
+      <div><h3>ToDo: More Better Good Stuff</h3></div>
+    </slide-deck>
+
   </body>
 </html>
