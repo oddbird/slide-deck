@@ -4,7 +4,7 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.1.1 - unreleased
+## v0.1.1 - 2023-12-26
 
 - 💥 BREAKING: Updated keyboard shortcuts
   to match [PowerPoint](https://support.microsoft.com/en-us/office/use-keyboard-shortcuts-to-deliver-powerpoint-presentations-1524ffce-bd2a-45f4-9a7f-f18b992b93a0#bkmk_frequent_macos),
