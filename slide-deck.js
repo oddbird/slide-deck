@@ -524,6 +524,10 @@ class slideDeck extends HTMLElement {
             this.resumeEvent();
           }
           break;
+        case '.':
+          event.preventDefault();
+          this.endEvent();
+          break;
         default:
           break;
       }
@@ -543,12 +547,6 @@ class slideDeck extends HTMLElement {
           event.preventDefault();
           this.endEvent();
         }
-        return;
-      }
-
-      if (event.metaKey && event.key === '.') {
-        event.preventDefault();
-        this.endEvent();
         return;
       }
 
