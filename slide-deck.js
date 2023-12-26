@@ -188,9 +188,6 @@ class slideDeck extends HTMLElement {
     this[slideDeck.attrToPropMap[name]] = newValue || this.hasAttribute(name);
 
     switch (name) {
-      case 'full-screen':
-        this.fullScreenChange();
-        break;
       case 'follow-active':
         this.followActiveChange();
         break;
@@ -240,7 +237,7 @@ class slideDeck extends HTMLElement {
     // custom events
     this.addEventListener('toggleControl', (e) => this.toggleAttribute('key-control'));
     this.addEventListener('toggleFollow', (e) => this.toggleAttribute('follow-active'));
-    this.addEventListener('toggleFullscreen', (e) => this.toggleAttribute('full-screen'));
+    this.addEventListener('toggleFullscreen', (e) => this.fullScreenEvent());
     this.addEventListener('toggleView', (e) => this.toggleView());
     this.addEventListener('grid', (e) => this.toggleView('grid'));
     this.addEventListener('list', (e) => this.toggleView('list'));
@@ -251,6 +248,7 @@ class slideDeck extends HTMLElement {
     this.addEventListener('resume', (e) => this.resumeEvent());
     this.addEventListener('end', (e) => this.endEvent());
     this.addEventListener('reset', (e) => this.resetEvent());
+    this.addEventListener('blankSlide', (e) => this.blankSlideEvent());
 
     this.addEventListener('nextSlide', (e) => this.move(1));
     this.addEventListener('savedSlide', (e) => this.goToSaved());
@@ -411,11 +409,21 @@ class slideDeck extends HTMLElement {
     this.resetActive();
   }
 
-  toggleBlank = (color) => {
+  blankSlideEvent = (color) => {
     if (this.hasAttribute('blank-slide')) {
       this.removeAttribute('blank-slide');
     } else {
       this.setAttribute('blank-slide', color || 'black');
+    }
+  }
+
+  fullScreenEvent = () => {
+    this.toggleAttribute('full-screen');
+
+    if (this.fullScreen && this.requestFullscreen) {
+      this.requestFullscreen();
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
     }
   }
 
@@ -426,14 +434,6 @@ class slideDeck extends HTMLElement {
       window.addEventListener('storage', (e) => this.goToSaved());
     } else {
       window.removeEventListener('storage', (e) => this.goToSaved());
-    }
-  }
-
-  fullScreenChange = () => {
-    if (this.fullScreen && this.requestFullscreen) {
-      this.requestFullscreen();
-    } else if (document.fullscreenElement) {
-      document.exitFullscreen();
     }
   }
 
@@ -512,7 +512,7 @@ class slideDeck extends HTMLElement {
         case 'f':
           if (event.shiftKey) {
             event.preventDefault();
-            this.toggleAttribute('full-screen');
+            this.fullScreenEvent();
           }
           break;
         case 'Enter':
@@ -569,11 +569,11 @@ class slideDeck extends HTMLElement {
           break;
         case 'blackOut':
           event.preventDefault();
-          this.toggleBlank('black');
+          this.blankSlideEvent('black');
           break;
         case 'whiteOut':
           event.preventDefault();
-          this.toggleBlank('white');
+          this.blankSlideEvent('white');
           break;
         case 'endPresentation':
           event.preventDefault();
