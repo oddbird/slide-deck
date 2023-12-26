@@ -228,11 +228,11 @@ class slideDeck extends HTMLElement {
     this.setupViewButtons();
 
     // event listeners
-    this.shadowRoot.addEventListener('keydown', (e) => {
-      e.stopPropagation();
+    this.shadowRoot.addEventListener('keydown', (event) => {
+      event.stopPropagation();
 
-      if (e.key === 'k' && e.metaKey) {
-        e.preventDefault();
+      if ((event.key === 'k' && event.metaKey) || event.key === 'Escape') {
+        event.preventDefault();
         this.controlPanel.close();
       }
     });
