@@ -4,6 +4,10 @@ A Web Component for web presentations.
 
 **[Demo](https://slide-deck.netlify.app)**
 
+**⚠️ This is a pre-release**:
+Breaking changes will be allowed in minor versions
+until we achieve a stable v1.0 release
+
 ## Examples
 
 General usage example:
