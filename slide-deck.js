@@ -377,10 +377,15 @@ class slideDeck extends HTMLElement {
 
   startEvent = () => {
     this.goTo(1);
-    this.resumeEvent();
+    this.startPresenting();
   }
 
   resumeEvent = () => {
+    this.goToSaved();
+    this.startPresenting();
+  }
+
+  startPresenting = () => {
     this.setAttribute('slide-view', 'list');
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
