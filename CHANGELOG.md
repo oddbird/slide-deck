@@ -12,6 +12,7 @@ until we achieve a stable v1.0 release
   rather than 'toggle full-screen' (now `command-shift-f`)
 - 🚀 NEW: Support for blank-screen shortcuts
   (inspired by [Curtis Wilcox](https://codepen.io/ccwilcox/details/NWJWwOE))
+- 🚀 NEW: Both start/resume events target active slides
 - 🚀 NEW: Control panel includes toggle for keyboard controls
 - 🚀 NEW: Control panel buttons have `aria-pressed` styles
 - 🚀 NEW: All slide-event buttons that toggle a boolean state
