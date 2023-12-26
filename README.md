@@ -67,6 +67,29 @@ This Web Component allows you to:
 - Follow along in a second tab (speaker view)
 - Toggle full-screen mode
 
+## Keyboard Shortcuts
+
+Always available:
+
+- `command-k`: Toggle control panel
+- `command-shift-enter`: Start presentation (from first slide)
+- `command-enter`: Resume presentation (from active slide)
+- `command-shift-f`: Toggle full-screen mode
+
+When presenting (key-control is active):
+
+- `N`/`rightArrow`/`downArrow`/`pageDown`: Next slide
+- `P`/`leftArrow`/`upArrow`/`pageUp`: Previous slide
+- `home`: First slide
+- `end`: Last slide
+- `W`/`,`: Toggle white screen
+- `B`/`.`: Toggle black screen
+- `escape`: Blur focused element, close control panel, or end presentation
+- `command-.`: End presentation
+
+These are based on
+the [PowerPoint shortcuts](https://support.microsoft.com/en-us/office/use-keyboard-shortcuts-to-deliver-powerpoint-presentations-1524ffce-bd2a-45f4-9a7f-f18b992b93a0#bkmk_frequent_macos).
+
 ## Installation
 
 You have a few options (choose one of these):

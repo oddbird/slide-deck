@@ -10,7 +10,12 @@
   </head>
   <body>
     <slide-deck id="my-slides" key-control>
-      <header><h1>Slide-Deck Web Component</h1></header>
+      <header>
+        <h1>Slide-Deck Web Component</h1>
+        <p>
+          <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
+        </p>
+      </header>
       <div><h2>No Dependencies</h2></div>
       <div><h2>Progressive Enhancement</h2></div>
       <div><h2>Just HTML</h2></div>
@@ -18,20 +23,54 @@
       <div>
         <h3>Always available:</h3>
         <ul>
-          <li><strong>command-k</strong>: control panel</li>
-          <li><strong>command-period</strong>: fullscreen</li>
+          <li><strong>command-k</strong>: Toggle control panel</li>
+          <li><strong>command-shift-enter</strong>: Start presentation (from first slide)</li>
+          <li><strong>command-enter</strong>: Resume presentation (from active slide)</li>
+          <li><strong>command-shift-f</strong>: Toggle full-screen mode</li>
         </ul>
       </div>
       <div>
         <h3>Active Presentation:</h3>
         <ul>
           <li>
-            <strong>right-arrow</strong>/<strong>page-down</strong>:
-            next slide
+            <strong>N</strong>
+            / <strong>right-arrow</strong>
+            / <strong>down-arrow</strong>
+            / <strong>page-down</strong>:
+            Next slide
           </li>
           <li>
-            <strong>left-arrow</strong>/<strong>page-up</strong>:
-            previous slide
+            <strong>P</strong>
+            / <strong>left-arrow</strong>
+            / <strong>up-arrow</strong>
+            / <strong>page-up</strong>:
+            Previous slide
+          </li>
+          <li>
+            <strong>home</strong>:
+            First slide
+          </li>
+          <li>
+            <strong>end</strong>:
+            Last slide
+          </li>
+          <li>
+            <strong>W</strong>
+            / <strong>,</strong>:
+            Toggle white screen
+          </li>
+          <li>
+            <strong>B</strong>
+            / <strong>.</strong>:
+            Toggle black screen
+          </li>
+          <li>
+            <strong>escape</strong>:
+            Blur focused element, close control panel, or end presentation
+          </li>
+          <li>
+            <strong>command-.</strong>:
+            End presentation
           </li>
         </ul>
       </div>
@@ -53,18 +92,17 @@
         </div>
       </div>
       <div><h2>Speaker View</h2></div>
-      <div><h2>Open Source</h2></div>
       <div>
-        <h3>ToDo: Github Repo</h3>
-        <p>(and NPM package??)</p>
+        <h2>Open Source</h2>
+        <p>
+          <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
+        </p>
       </div>
-      <div><h3>ToDo: Full Documentation</h3></div>
-      <div><h3>ToDo: Improved</h3></div>
-      <div><h3>ToDo: Speaker Notes</h3></div>
-      <div><h3>ToDo: Slide Templates</h3></div>
-      <div><h3>ToDo: CSS Themes</h3></div>
-      <div><h3>ToDo: More Shortcuts</h3></div>
-      <div><h3>ToDo: More Better Good Stuff</h3></div>
+      <div><h2>To Do…</h2></div>
+      <div><h3>… Speaker Notes</h3></div>
+      <div><h3>… Slide Templates</h3></div>
+      <div><h3>… CSS Themes</h3></div>
+      <div><h3>… More Better Good Stuff</h3></div>
     </slide-deck>
 
   </body>

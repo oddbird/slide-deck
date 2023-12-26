@@ -7,14 +7,16 @@ class slideDeck extends HTMLElement {
         <form method="dialog"><button>close</button></form>
         <div>
           <slot name="slide-controls">
+            <button slide-event='toggleControl'>keyboard controls</button>
+
             <p><strong>Presentation:</strong></p>
             <button slide-event>start</button>
             <button slide-event>end</button>
             <button slide-event="joinWithNotes">speaker view</button>
 
             <p><strong>View:</strong></p>
-            <button slide-view>grid</button>
-            <button slide-view>list</button>
+            <button set-view>grid</button>
+            <button set-view>list</button>
           </slot>
         </div>
       </dialog>
@@ -30,12 +32,15 @@ class slideDeck extends HTMLElement {
   static adoptShadowStyles = (node) => {
     const shadowStyle = new CSSStyleSheet();
     shadowStyle.replaceSync(`
+      :host {
+        position: relative;
+      }
+
       :host:not(:fullscreen) {
         container: host / inline-size;
       }
 
       :host(:fullscreen) {
-        container-type: auto;
         background-color: white;
         overflow-x: clip;
         overflow-y: auto;
@@ -51,6 +56,17 @@ class slideDeck extends HTMLElement {
 
       :host([slide-view=list]) {
         ---slide-list-border: var(--slide-list-border, thin solid);
+      }
+
+      :host([blank-slide])::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: var(--blank-slide-color, black);
+      }
+
+      :host([blank-slide='white'])::after {
+        --blank-slide-color: white;
       }
 
       [part=contents] {
@@ -91,6 +107,14 @@ class slideDeck extends HTMLElement {
         );
         outline-offset: var(--slide-active-outline-offset, 3px);
       }
+
+      button[aria-pressed=true] {
+        box-shadow: inset 0 0 2px black;
+
+        &::before {
+          content: ' ✅ ';
+        }
+      }
     `);
     node.shadowRoot.adoptedStyleSheets = [shadowStyle];
   }
@@ -122,12 +146,41 @@ class slideDeck extends HTMLElement {
     'list',
   ];
 
+  static controlKeys = {
+    'Home': 'firstSlide',
+    'End': 'lastSlide',
+
+    // next slide
+    'ArrowRight': 'nextSlide',
+    'ArrowDown': 'nextSlide',
+    'PageDown': 'nextSlide',
+    'N': 'nextSlide',
+    ' ': 'nextSlide',
+
+    // previous slide
+    'ArrowLeft': 'previousSlide',
+    'ArrowUp': 'previousSlide',
+    'PageUp': 'previousSlide',
+    'P': 'previousSlide',
+    'Delete': 'previousSlide',
+
+    // blank slide
+    'B': 'blackOut',
+    '.': 'blackOut',
+    'W': 'whiteOut',
+    ',': 'whiteOut',
+
+    // end
+    '-': 'endPresentation'
+  }
+
   // dynamic
   store = {};
   slideCount;
   controlPanel;
   eventButtons;
   viewButtons;
+  activeSlide;
   body;
 
   // callbacks
@@ -143,10 +196,13 @@ class slideDeck extends HTMLElement {
         break;
       case 'slide-view':
         this.updateViewButtons();
+        this.scrollToActive();
         break;
       default:
         break;
     }
+
+    this.updateEventButtons();
   }
 
   constructor() {
@@ -165,7 +221,7 @@ class slideDeck extends HTMLElement {
     this.slideCount = this.childElementCount;
     this.defaultAttrs();
     this.setSlideIDs();
-    this.slideToStore();
+    this.goTo();
 
     // buttons
     this.setupEventButtons();
@@ -173,9 +229,10 @@ class slideDeck extends HTMLElement {
 
     // event listeners
     this.shadowRoot.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+
       if (e.key === 'k' && e.metaKey) {
         e.preventDefault();
-        e.stopPropagation();
         this.controlPanel.close();
       }
     });
@@ -250,6 +307,23 @@ class slideDeck extends HTMLElement {
   };
 
   // buttons
+  getButtonEvent = (btn) => btn.getAttribute('slide-event') || btn.innerText;
+
+  updateEventButtons = () => {
+    this.eventButtons.forEach((btn) => {
+      const btnEvent = this.getButtonEvent(btn);
+      let isActive = {
+        'toggleControl': this.keyControl,
+        'toggleFollow': this.followActive,
+        'toggleFullscreen': this.fullScreen,
+      }
+
+      if (Object.keys(isActive).includes(btnEvent)) {
+        btn.setAttribute('aria-pressed', isActive[btnEvent]);
+      }
+    });
+  }
+
   setupEventButtons = () => {
     this.eventButtons = [
       ...this.querySelectorAll(`button[slide-event]`),
@@ -258,10 +332,12 @@ class slideDeck extends HTMLElement {
 
     this.eventButtons.forEach((btn) => {
       btn.addEventListener('click', (e) => {
-        const event = btn.getAttribute('slide-event') || btn.innerText;
+        const event = this.getButtonEvent(btn);
         this.dispatchEvent(new Event(event, { view: window, bubbles: false }));
       });
     });
+
+    this.updateEventButtons();
   }
 
   getButtonView = (btn) => btn.getAttribute('set-view') || btn.innerText;
@@ -335,6 +411,14 @@ class slideDeck extends HTMLElement {
     this.resetActive();
   }
 
+  toggleBlank = (color) => {
+    if (this.hasAttribute('blank-slide')) {
+      this.removeAttribute('blank-slide');
+    } else {
+      this.setAttribute('blank-slide', color || 'black');
+    }
+  }
+
   // dynamic attribute methods
   followActiveChange = () => {
     if (this.followActive) {
@@ -354,36 +438,62 @@ class slideDeck extends HTMLElement {
   }
 
   // storage
-  asSlideInt = (string) => parseInt(string, 10) || 1;
+  asSlideInt = (string) => parseInt(string, 10);
 
-  slideFromHash = (hash) => this.asSlideInt(hash.split('-').pop());
+  slideFromHash = () => window.location.hash.startsWith('#slide_')
+    ? this.asSlideInt(window.location.hash.split('-').pop())
+    : null;
   slideFromStore = () => this.asSlideInt(
     localStorage.getItem(this.store.slide)
   );
 
-  slideToHash = (to) => { window.location.hash = this.slideId(to) };
-  slideToStore = (to) => {
-    const active = to || this.slideFromHash(window.location.hash);
-    localStorage.setItem(this.store.slide, active);
+  slideToHash = (to) => {
+    if (to) {
+      window.location.hash = this.slideId(to);
+    }
   };
-
-  resetActive = () => {
-    window.location.hash = this.id;
-    localStorage.removeItem(this.store.slide);
+  slideToStore = (to) => {
+    if (to) {
+      localStorage.setItem(this.store.slide, to);
+    } else {
+      localStorage.removeItem(this.store.slide);
+    }
   };
 
   // navigation
   inRange = (slide) => slide >= 1 && slide <= this.slideCount;
+  getActive = () => this.slideFromHash() || this.activeSlide;
 
-  goTo = (slide) => {
-    if (this.inRange(slide)) {
-      this.slideToHash(slide);
-      this.slideToStore(slide);
+  scrollToActive = () => {
+    const activeEl = document.getElementById(this.slideId(this.activeSlide));
+
+    if (activeEl) {
+      activeEl.scrollIntoView(true);
     }
   };
 
+  goTo = (to) => {
+    const fromHash = this.slideFromHash();
+    const setTo = to || this.getActive();
+
+    if (setTo && this.inRange(setTo)) {
+      this.activeSlide = setTo;
+      this.slideToStore(setTo);
+
+      if (setTo !== fromHash) {
+        this.slideToHash(setTo);
+      }
+    }
+  }
+
+  resetActive = () => {
+    this.activeSlide = null;
+    window.location.hash = this.id;
+    localStorage.removeItem(this.store.slide);
+  };
+
   move = (by) => {
-    const to = this.slideFromHash(window.location.hash) + by;
+    const to = (this.getActive() || 0) + by;
     this.goTo(to);
   };
 
@@ -392,45 +502,84 @@ class slideDeck extends HTMLElement {
   }
 
   keyEventActions = (event) => {
+    // always available
     if (event.metaKey) {
       switch (event.key) {
         case 'k':
           event.preventDefault();
           this.controlPanel.showModal();
           break;
-        case '.':
-          event.preventDefault();
-          this.toggleAttribute('full-screen');
+        case 'f':
+          if (event.shiftKey) {
+            event.preventDefault();
+            this.toggleAttribute('full-screen');
+          }
+          break;
+        case 'Enter':
+          if (event.shiftKey) {
+            event.preventDefault();
+            this.startEvent();
+          } else {
+            event.preventDefault();
+            this.resumeEvent();
+          }
           break;
         default:
           break;
       }
-    }
-
-    if (event.target !== this.body) {
-      if (event.key === 'Escape') {
-        event.target.blur();
-      }
+      return;
+    } else if (event.altKey && event.key === 'Enter') {
+      event.preventDefault();
+      this.joinWithNotesEvent();
       return;
     }
 
+    // only while key-control is active
     if (this.keyControl) {
-      switch (event.key) {
-        case 'ArrowRight':
+      if (event.key === 'Escape') {
+        if (event.target !== this.body) {
+          event.target.blur();
+        } else {
+          event.preventDefault();
+          this.endEvent();
+        }
+        return;
+      }
+
+      if (event.metaKey && event.key === '.') {
+        event.preventDefault();
+        this.endEvent();
+        return;
+      }
+
+      switch (slideDeck.controlKeys[event.key]) {
+        case 'firstSlide':
+          event.preventDefault();
+          this.goTo(1);
+          break;
+        case 'lastSlide':
+          event.preventDefault();
+          this.goTo(this.slideCount);
+          break;
+        case 'nextSlide':
           event.preventDefault();
           this.move(1);
           break;
-        case 'PageDown':
-          event.preventDefault();
-          this.move(1);
-          break;
-        case 'ArrowLeft':
+        case 'previousSlide':
           event.preventDefault();
           this.move(-1);
           break;
-        case 'PageUp':
+        case 'blackOut':
           event.preventDefault();
-          this.move(-1);
+          this.toggleBlank('black');
+          break;
+        case 'whiteOut':
+          event.preventDefault();
+          this.toggleBlank('white');
+          break;
+        case 'endPresentation':
+          event.preventDefault();
+          this.endEvent();
           break;
         default:
           break;
