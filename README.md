@@ -4,6 +4,10 @@ A Web Component for web presentations.
 
 **[Demo](https://slide-deck.netlify.app)**
 
+**⚠️ This is a pre-release**:
+Breaking changes will be allowed in minor versions
+until we achieve a stable v1.0 release
+
 ## Examples
 
 General usage example:
@@ -66,6 +70,29 @@ This Web Component allows you to:
 - Control presentations with a remote, or a keyboard
 - Follow along in a second tab (speaker view)
 - Toggle full-screen mode
+
+## Keyboard Shortcuts
+
+Always available:
+
+- `command-k`: Toggle control panel
+- `command-shift-enter`: Start presentation (from first slide)
+- `command-enter`: Resume presentation (from active slide)
+- `command-.`: End presentation
+- `command-shift-f`: Toggle full-screen mode
+
+When presenting (key-control is active):
+
+- `N`/`rightArrow`/`downArrow`/`pageDown`: Next slide
+- `P`/`leftArrow`/`upArrow`/`pageUp`: Previous slide
+- `home`: First slide
+- `end`: Last slide
+- `W`/`,`: Toggle white screen
+- `B`/`.`: Toggle black screen
+- `escape`: Blur focused element, close control panel, or end presentation
+
+These are based on
+the [PowerPoint shortcuts](https://support.microsoft.com/en-us/office/use-keyboard-shortcuts-to-deliver-powerpoint-presentations-1524ffce-bd2a-45f4-9a7f-f18b992b93a0#bkmk_frequent_macos).
 
 ## Installation
 
