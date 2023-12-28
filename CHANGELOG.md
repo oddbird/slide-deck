@@ -4,6 +4,16 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.1.2 - unreleased
+
+- 🚀 NEW: Add support for slide parts – `slide-frame` & `slide-note`
+  (these parts require light DOM styles)
+- 🚀 NEW: Slide parts can be hidden
+  with the `hide-parts="note | frame"` attribute
+  (both parts cannot be hidden at the same time)
+- 🚀 NEW: Add support for `hide-part="note | frame"` buttons
+  to toggle hiding the notes and frames
+
 ## v0.1.1 - 2023-12-26
 
 - 💥 BREAKING: Updated keyboard shortcuts

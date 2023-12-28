@@ -17,6 +17,10 @@ class slideDeck extends HTMLElement {
             <p><strong>View:</strong></p>
             <button set-view>grid</button>
             <button set-view>list</button>
+
+            <p><strong>Hide:</strong></p>
+            <button hide-part="frame">slides</button>
+            <button hide-part="note">notes</button>
           </slot>
         </div>
       </dialog>
@@ -88,16 +92,19 @@ class slideDeck extends HTMLElement {
       }
 
       ::slotted([id^=slide_]) {
-        aspect-ratio: var(--slide-grid-ratio, var(---slide-grid-ratio));
         container-name: slide;
         container-type: var(--slide-container, inline-size);
-        border: var(---slide-grid-border);
-        border-block-end: var(---slide-list-border);
-        padding: var(---slide-gap);
         scroll-margin: var(
           --slide-grid-scroll-margin,
           var(---slide-grid-scroll-margin)
         );
+      }
+
+      ::slotted([slide-frame]) {
+        aspect-ratio: var(--slide-grid-ratio, var(---slide-grid-ratio));
+        border: var(---slide-grid-border);
+        border-block-end: var(---slide-list-border);
+        padding: var(---slide-gap);
       }
 
       ::slotted([id^=slide_]:target) {
@@ -125,6 +132,7 @@ class slideDeck extends HTMLElement {
     'follow-active',
     'full-screen',
     'slide-view',
+    'hide-parts',
   ];
 
   static attrToPropMap = {
@@ -132,6 +140,7 @@ class slideDeck extends HTMLElement {
     'follow-active': 'followActive',
     'full-screen': 'fullScreen',
     'slide-view': 'slideView',
+    'hide-parts': 'hideParts',
   };
 
   static storageKeys = [
@@ -176,12 +185,15 @@ class slideDeck extends HTMLElement {
 
   // dynamic
   store = {};
+  slides;
+  slideNotes;
+  slideFrames;
   slideCount;
+  activeSlide;
   controlPanel;
   eventButtons;
   viewButtons;
-  activeSlide;
-  body;
+  #body;
 
   // callbacks
   attributeChangedCallback(name, oldValue, newValue) {
@@ -189,17 +201,22 @@ class slideDeck extends HTMLElement {
 
     switch (name) {
       case 'follow-active':
-        this.followActiveChange();
+        this.#followActiveChange();
+        this.#updateEventButtons();
+        break;
+      case 'hide-parts':
+        this.#hidePartsChange();
+        this.#updatePartButtons();
         break;
       case 'slide-view':
-        this.updateViewButtons();
+        this.#updateViewButtons();
         this.scrollToActive();
         break;
       default:
         break;
     }
 
-    this.updateEventButtons();
+    this.#updateEventButtons();
   }
 
   constructor() {
@@ -208,21 +225,25 @@ class slideDeck extends HTMLElement {
     // shadow dom and ID
     slideDeck.appendShadowTemplate(this);
     slideDeck.adoptShadowStyles(this);
-    this.setDeckID();
+    this.#setDeckID();
 
     // relevant nodes
-    this.body = document.querySelector('body');
+    this.#body = document.querySelector('body');
     this.controlPanel = this.shadowRoot.querySelector(`[part="controls"]`);
+    this.slides = this.querySelectorAll(':scope > :not([slot=slide-controls])');
+    this.slideNotes = this.querySelectorAll('[slide-note]');
+    this.slideFrames = this.querySelectorAll('[slide-frame]:not(:scope > *)');
 
     // initial setup
-    this.slideCount = this.childElementCount;
-    this.defaultAttrs();
-    this.setSlideIDs();
+    this.slideCount = this.slides.length;
+    this.#defaultAttrs();
+    this.#setupSlides();
     this.goTo();
 
     // buttons
-    this.setupEventButtons();
-    this.setupViewButtons();
+    this.#setupEventButtons();
+    this.#setupViewButtons();
+    this.#setupPartButtons();
 
     // event listeners
     this.shadowRoot.addEventListener('keydown', (event) => {
@@ -242,6 +263,10 @@ class slideDeck extends HTMLElement {
     this.addEventListener('grid', (e) => this.toggleView('grid'));
     this.addEventListener('list', (e) => this.toggleView('list'));
 
+    this.addEventListener('toggleFrame', (e) => this.togglePart('frame'));
+    this.addEventListener('toggleNote', (e) => this.togglePart('note'));
+    this.addEventListener('showAll', (e) => this.removeAttribute('hide-parts'));
+
     this.addEventListener('join', (e) => this.joinEvent());
     this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
     this.addEventListener('start', (e) => this.startEvent());
@@ -256,27 +281,27 @@ class slideDeck extends HTMLElement {
   };
 
   connectedCallback() {
-    this.body.addEventListener('keydown', this.keyEventActions);
+    this.#body.addEventListener('keydown', this.#keyEventActions);
   }
 
   disconnectedCallback() {
-    this.body.removeEventListener('keydown', this.keyEventActions);
+    this.#body.removeEventListener('keydown', this.#keyEventActions);
   }
 
   // setup methods
-  newDeckId = (from, count) => {
+  #newDeckId = (from, count) => {
     const base = from || window.location.pathname.split('.')[0];
     const ID = count ? `${base}-${count}` : base;
 
     if (document.getElementById(ID)) {
-      return this.newDeckId(base, (count || 0) + 1);
+      return this.#newDeckId(base, (count || 0) + 1);
     }
 
     return ID;
   };
 
-  setDeckID = () => {
-    this.id = this.id || this.newDeckId();
+  #setDeckID = () => {
+    this.id = this.id || this.#newDeckId();
 
     // storage keys based on slide ID
     slideDeck.storageKeys.forEach((key) => {
@@ -284,17 +309,22 @@ class slideDeck extends HTMLElement {
     });
   }
 
-  slideId = (n) => `slide_${this.id}-${n}`;
+  #slideId = (n) => `slide_${this.id}-${n}`;
 
-  setSlideIDs = () => {
+  #setupSlides = () => {
     const slides = this.querySelectorAll(':scope > *');
 
     slides.forEach((slide, index) => {
-      slide.id = this.slideId(index + 1);
+      slide.id = this.#slideId(index + 1);
+      if (slide.querySelector('[slide-frame]')) {
+        slide.toggleAttribute('slide-group', true);
+      } else {
+        slide.toggleAttribute('slide-frame', true);
+      }
     });
   };
 
-  defaultAttrs = () => {
+  #defaultAttrs = () => {
     // view required
     if (!this.hasAttribute('slide-view')) {
       this.setAttribute('slide-view', 'grid');
@@ -305,13 +335,76 @@ class slideDeck extends HTMLElement {
   };
 
   // buttons
-  getButtonEvent = (btn) => btn.getAttribute('slide-event') || btn.innerText;
+  #findButtons = (attr) => [
+    ...this.querySelectorAll(`button[${attr}]`),
+    ...this.shadowRoot.querySelectorAll(`button[${attr}]`),
+  ];
 
-  updateEventButtons = () => {
+  #getButtonValue = (btn, attr) => btn.getAttribute(attr) || btn.innerText;
+
+  #setToggleState = (btn, attr, state) => {
+    const isActive = this.#getButtonValue(btn, attr) === state;
+    btn.setAttribute('aria-pressed', isActive);
+  }
+
+  #setupViewButtons = () => {
+    this.slideView = this.slideView || this.getAttribute('slide-view');
+    this.viewButtons = this.#findButtons('set-view');
+
+    this.viewButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        this.setAttribute('slide-view', this.#getButtonValue(btn, 'set-view'));
+      });
+      this.#setToggleState(btn, 'set-view', this.slideView);
+    });
+  }
+
+  #updateViewButtons = () => {
+    this.viewButtons.forEach((btn) => {
+      this.#setToggleState(btn, 'set-view', this.slideView);
+    });
+  }
+
+  #setupPartButtons = () => {
+    this.hideParts = this.hideParts || this.getAttribute('hide-parts');
+    this.partButtons = this.#findButtons('hide-part');
+
+    this.partButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        this.togglePart(this.#getButtonValue(btn, 'hide-part'));
+      });
+      this.#setToggleState(btn, 'hide-part', this.hideParts);
+    });
+  }
+
+  #updatePartButtons = () => {
+    this.partButtons.forEach((btn) => {
+      this.#setToggleState(btn, 'hide-part', this.hideParts);
+    });
+  }
+
+  // event buttons
+  #setupEventButtons = () => {
+    this.eventButtons = this.#findButtons('slide-event');
+
     this.eventButtons.forEach((btn) => {
-      const btnEvent = this.getButtonEvent(btn);
+      btn.addEventListener('click', (e) => {
+        const event = this.#getButtonValue(btn, 'slide-event');
+        this.dispatchEvent(new Event(event, { view: window, bubbles: false }));
+      });
+    });
+
+    this.#updateEventButtons();
+  }
+
+  #updateEventButtons = () => {
+    this.eventButtons.forEach((btn) => {
+      const btnEvent = this.#getButtonValue(btn, 'slide-event');
+
       let isActive = {
         'toggleControl': this.keyControl,
+        'toggleFrame': this.hideParts === 'frame',
+        'toggleNote': this.hideParts === 'note',
         'toggleFollow': this.followActive,
         'toggleFullscreen': this.fullScreen,
       }
@@ -322,76 +415,45 @@ class slideDeck extends HTMLElement {
     });
   }
 
-  setupEventButtons = () => {
-    this.eventButtons = [
-      ...this.querySelectorAll(`button[slide-event]`),
-      ...this.shadowRoot.querySelectorAll(`button[slide-event]`),
-    ];
-
-    this.eventButtons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const event = this.getButtonEvent(btn);
-        this.dispatchEvent(new Event(event, { view: window, bubbles: false }));
-      });
-    });
-
-    this.updateEventButtons();
-  }
-
-  getButtonView = (btn) => btn.getAttribute('set-view') || btn.innerText;
-
-  setupViewButtons = () => {
-    this.viewButtons = [
-      ...this.querySelectorAll(`button[set-view]`),
-      ...this.shadowRoot.querySelectorAll(`button[set-view]`),
-    ];
-
-    this.viewButtons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        this.setAttribute('slide-view', this.getButtonView(btn));
-      });
-    });
-
-    this.slideView = this.slideView || this.getAttribute('slide-view');
-    this.updateViewButtons();
-  }
-
-  updateViewButtons = () => {
-    this.viewButtons.forEach((btn) => {
-      const isActive = this.getButtonView(btn) === this.slideView;
-      btn.setAttribute('aria-pressed', isActive);
-    });
-  }
-
   // event handlers
   toggleView = (to) => {
+    let next;
+
     if (!to) {
       const current = this.getAttribute('slide-view');
       const l = slideDeck.slideViews - 1; // adjust for 0-index
       const i = slideDeck.slideViews.indexOf(current);
-      const next = slideDeck.slideViews[(i + 1) % l];
+      next = slideDeck.slideViews[(i + 1) % l];
     }
 
     this.setAttribute('slide-view', to || next || 'grid');
   }
 
-  startEvent = () => {
-    this.goTo(1);
-    this.startPresenting();
+  togglePart = (type = 'note') => {
+    this.hideParts === type
+      ? this.removeAttribute('hide-parts')
+      : this.setAttribute('hide-parts', type);
   }
 
-  resumeEvent = () => {
-    this.goToSaved();
-    this.startPresenting();
-  }
-
-  startPresenting = () => {
+  #startPresenting = () => {
+    this.setAttribute('hide-parts', 'note');
     this.setAttribute('slide-view', 'list');
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
   }
 
+  startEvent = () => {
+    this.goTo(1);
+    this.#startPresenting();
+  }
+
+  resumeEvent = () => {
+    this.goToSaved();
+    this.#startPresenting();
+  }
+
   joinWithNotesEvent = () => {
+    if (this.hideParts === 'note') { this.removeAttribute('hide-parts'); }
     this.setAttribute('slide-view', 'grid');
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
@@ -433,7 +495,7 @@ class slideDeck extends HTMLElement {
   }
 
   // dynamic attribute methods
-  followActiveChange = () => {
+  #followActiveChange = () => {
     if (this.followActive) {
       this.goToSaved();
       window.addEventListener('storage', (e) => this.goToSaved());
@@ -442,22 +504,32 @@ class slideDeck extends HTMLElement {
     }
   }
 
-  // storage
-  asSlideInt = (string) => parseInt(string, 10);
+  #hidePartsChange = () => {
+    this.slideNotes.forEach((note) => {
+      note.toggleAttribute('hidden', this.hideParts === 'note');
+    });
 
-  slideFromHash = () => window.location.hash.startsWith('#slide_')
-    ? this.asSlideInt(window.location.hash.split('-').pop())
+    this.slideFrames.forEach((frame) => {
+      frame.toggleAttribute('hidden', this.hideParts === 'frame');
+    });
+  }
+
+  // storage
+  #asSlideInt = (string) => parseInt(string, 10);
+
+  #slideFromHash = () => window.location.hash.startsWith('#slide_')
+    ? this.#asSlideInt(window.location.hash.split('-').pop())
     : null;
-  slideFromStore = () => this.asSlideInt(
+  #slideFromStore = () => this.#asSlideInt(
     localStorage.getItem(this.store.slide)
   );
 
-  slideToHash = (to) => {
+  #slideToHash = (to) => {
     if (to) {
-      window.location.hash = this.slideId(to);
+      window.location.hash = this.#slideId(to);
     }
   };
-  slideToStore = (to) => {
+  #slideToStore = (to) => {
     if (to) {
       localStorage.setItem(this.store.slide, to);
     } else {
@@ -466,11 +538,11 @@ class slideDeck extends HTMLElement {
   };
 
   // navigation
-  inRange = (slide) => slide >= 1 && slide <= this.slideCount;
-  getActive = () => this.slideFromHash() || this.activeSlide;
+  #inRange = (slide) => slide >= 1 && slide <= this.slideCount;
+  #getActive = () => this.#slideFromHash() || this.activeSlide;
 
   scrollToActive = () => {
-    const activeEl = document.getElementById(this.slideId(this.activeSlide));
+    const activeEl = document.getElementById(this.#slideId(this.activeSlide));
 
     if (activeEl) {
       activeEl.scrollIntoView(true);
@@ -478,15 +550,15 @@ class slideDeck extends HTMLElement {
   };
 
   goTo = (to) => {
-    const fromHash = this.slideFromHash();
-    const setTo = to || this.getActive();
+    const fromHash = this.#slideFromHash();
+    const setTo = to || this.#getActive();
 
-    if (setTo && this.inRange(setTo)) {
+    if (setTo && this.#inRange(setTo)) {
       this.activeSlide = setTo;
-      this.slideToStore(setTo);
+      this.#slideToStore(setTo);
 
       if (setTo !== fromHash) {
-        this.slideToHash(setTo);
+        this.#slideToHash(setTo);
       }
     }
   }
@@ -498,15 +570,15 @@ class slideDeck extends HTMLElement {
   };
 
   move = (by) => {
-    const to = (this.getActive() || 0) + by;
+    const to = (this.#getActive() || 0) + by;
     this.goTo(to);
   };
 
   goToSaved = () => {
-    this.goTo(this.slideFromStore());
+    this.goTo(this.#slideFromStore());
   }
 
-  keyEventActions = (event) => {
+  #keyEventActions = (event) => {
     // always available
     if (event.metaKey) {
       switch (event.key) {
@@ -546,7 +618,7 @@ class slideDeck extends HTMLElement {
     // only while key-control is active
     if (this.keyControl) {
       if (event.key === 'Escape') {
-        if (event.target !== this.body) {
+        if (event.target !== this.#body) {
           event.target.blur();
         } else {
           event.preventDefault();
