@@ -3,17 +3,22 @@ class slideDeck extends HTMLElement {
   static appendShadowTemplate = (node) => {
     const template = document.createElement("template");
     template.innerHTML = `
-      <dialog part="controls">
-        <form method="dialog"><button>close</button></form>
-        <div>
-          <slot name="slide-controls">
+      <dialog part="control-panel">
+        <div part="panel-header">
+          <strong>Slide Controls</strong>
+          <form method="dialog"><button>close</button></form>
+        </div>
+        <div part="controls">
+          <slot name="controls">
             <button slide-event='toggleControl'>keyboard controls</button>
 
+            <hr>
             <p><strong>Presentation:</strong></p>
             <button slide-event>start</button>
             <button slide-event>end</button>
             <button slide-event="joinWithNotes">speaker view</button>
 
+            <hr>
             <p><strong>View:</strong></p>
             <button set-view>grid</button>
             <button set-view>list</button>
@@ -33,6 +38,8 @@ class slideDeck extends HTMLElement {
     const shadowStyle = new CSSStyleSheet();
     shadowStyle.replaceSync(`
       :host {
+        ---slide-gap: clamp(5px, 1.5cqi, 15px);
+        --slide-border-color: silver;
         position: relative;
       }
 
@@ -42,16 +49,24 @@ class slideDeck extends HTMLElement {
 
       :host(:fullscreen) {
         background-color: white;
+        color: initial;
+        color-scheme: light;
         overflow-x: clip;
         overflow-y: auto;
       }
 
       :host([slide-view=grid]) {
         ---slide-grid-ratio: 16/9;
-        ---slide-grid-border: var(--slide-grid-border, thin solid);
+        ---slide-grid-border: var(
+          --slide-grid-border,
+          thin solid var(--slide-border-color, currentColor)
+        );
         ---slide-grid-active-outline: medium dotted hotpink;
         ---slide-grid-scroll-margin: clamp(10px, 4cqi, 40px);
-        ---slide-list-border: var(--slide-grid-border, thin solid);
+        ---slide-list-border: var(
+          --slide-grid-border,
+          thin solid var(--slide-border-color, currentColor)
+        );
       }
 
       :host([slide-view=list]) {
@@ -69,8 +84,32 @@ class slideDeck extends HTMLElement {
         --blank-slide-color: white;
       }
 
+      [part=control-panel] {
+        --panel-gap: clamp(16px, 2vi, 24px);
+        box-shadow: 0 0 0.25em black;
+        min-width: min(100%, 40ch);
+        padding: 0;
+
+        &::backdrop {
+          background-color: hsl(0deg 0% 0% / 0.75);
+        }
+      }
+
+      [part=panel-header] {
+        align-items: center;
+        background-color: hsla(0deg 0% 50% / 0.125);
+        border-bottom: thin solid gray;
+        display: grid;
+        gap: var(--panel-gap);
+        grid-template: 'name close' auto / 1fr auto;
+        padding: calc(var(--panel-gap) / 2) var(--panel-gap);
+      }
+
+      [part=controls] {
+        padding: var(--panel-gap);
+      }
+
       [part=contents] {
-        ---slide-gap: clamp(5px, 1.5cqi, 15px);
         display: grid;
 
         :host([slide-view=grid]) & {
@@ -108,11 +147,23 @@ class slideDeck extends HTMLElement {
         outline-offset: var(--slide-active-outline-offset, 3px);
       }
 
-      button[aria-pressed=true] {
-        box-shadow: inset 0 0 2px black;
+      button {
+        border: thin solid;
+        border-radius: 3px;
+        font-size: inherit;
+        padding: 0.25em 0.75em;
 
-        &::before {
-          content: ' ✅ ';
+        &:focus {
+          outline: medium solid;
+          outline-offset: 2px;
+        }
+
+        &[aria-pressed=true] {
+          box-shadow: inset 0 0 0.25em black;
+
+          &::before {
+            content: ' ✓ ';
+          }
         }
       }
     `);
@@ -212,7 +263,7 @@ class slideDeck extends HTMLElement {
 
     // relevant nodes
     this.body = document.querySelector('body');
-    this.controlPanel = this.shadowRoot.querySelector(`[part="controls"]`);
+    this.controlPanel = this.shadowRoot.querySelector(`[part="control-panel"]`);
 
     // initial setup
     this.slideCount = this.childElementCount;
@@ -287,8 +338,9 @@ class slideDeck extends HTMLElement {
   slideId = (n) => `slide_${this.id}-${n}`;
 
   setSlideIDs = () => {
-    const slides = this.querySelectorAll(':scope > *');
+    const slides = this.querySelectorAll(':scope > :not([slot=controls])');
 
+    console.log(slides);
     slides.forEach((slide, index) => {
       slide.id = this.slideId(index + 1);
     });

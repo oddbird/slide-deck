@@ -4,6 +4,13 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.1.2 - unreleased
+
+- 💥 BREAKING: Renamed and added control-panel parts,
+  to allow for more customization
+- 🚀 NEW: Basic control panel styles
+- 🐞 FIXED: Slotted controls are no longer treated as slides
+
 ## v0.1.1 - 2023-12-26
 
 - 💥 BREAKING: Updated keyboard shortcuts
