@@ -368,14 +368,15 @@ class slideDeck extends HTMLElement {
 
   // event handlers
   toggleView = (to) => {
-    if (!to) {
+    let next = to;
+    if (!next) {
       const current = this.getAttribute('slide-view');
-      const l = slideDeck.slideViews - 1; // adjust for 0-index
-      const i = slideDeck.slideViews.indexOf(current);
-      const next = slideDeck.slideViews[(i + 1) % l];
+      const l = slideDeck.slideViews.length;
+      const i = slideDeck.slideViews.indexOf(current) || 0;
+      next = slideDeck.slideViews[(i + 1) % l];
     }
 
-    this.setAttribute('slide-view', to || next || 'grid');
+    this.setAttribute('slide-view', next || 'grid');
   }
 
   startEvent = () => {
