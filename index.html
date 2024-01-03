@@ -11,15 +11,10 @@
   <body>
     <slide-deck id="my-slides" key-control>
       <header>
-        <div slide-frame>
-          <h1>Slide-Deck Web Component</h1>
-          <p>
-            <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
-          </p>
-        </div>
-        <div slide-note>
-          We can also add notes to slides.
-        </div>
+        <h1>Slide-Deck Web Component</h1>
+        <p>
+          <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
+        </p>
       </header>
       <div><h2>No Dependencies</h2></div>
       <div><h2>Progressive Enhancement</h2></div>
@@ -103,12 +98,42 @@
           <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
         </p>
       </div>
+
+      <div>
+        <style>
+          style ~ [slide-frame] {
+            aspect-ratio: 16/9;
+            border: thin dotted maroon;
+            padding: 1em;
+          }
+          style ~ [slide-note] {
+            padding-block: 0.5lh;
+          }
+        </style>
+        <div slide-frame>
+          <h2>Speaker Notes</h2>
+          <pre><code>&lt;div slide-frame&gt;
+  This slide has both a frame
+&lt;/div&gt;
+&lt;div slide-note&gt;
+  And a section for notes
+&lt;/div&gt;</code></pre>
+        </div>
+        <div slide-note>
+          We can also add notes to slides.
+          But the frame can't be styled
+          by shadow DOM CSS,
+          so this format is
+          <em>bring-your-own-styles</em>.
+          That also means we can use the
+          parent element as a container!
+        </div>
+      </div>
       <div><h2>To Do…</h2></div>
       <div><h3>… Speaker Notes</h3></div>
       <div><h3>… Slide Templates</h3></div>
       <div><h3>… CSS Themes</h3></div>
       <div><h3>… More Better Good Stuff</h3></div>
     </slide-deck>
-
   </body>
 </html>
