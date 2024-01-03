@@ -457,9 +457,9 @@ class slideDeck extends HTMLElement {
   slideFromHash = () => window.location.hash.startsWith('#slide_')
     ? this.asSlideInt(window.location.hash.split('-').pop())
     : null;
-  slideFromStore = () => this.asSlideInt(
+  slideFromStore = (fallback = 1) => this.asSlideInt(
     localStorage.getItem(this.store.slide)
-  );
+  ) || fallback;
 
   slideToHash = (to) => {
     if (to) {
@@ -512,7 +512,7 @@ class slideDeck extends HTMLElement {
   };
 
   goToSaved = () => {
-    this.goTo(this.slideFromStore() || 1);
+    this.goTo(this.slideFromStore());
   }
 
   keyEventActions = (event) => {
