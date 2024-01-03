@@ -6,9 +6,15 @@ until we achieve a stable v1.0 release
 
 ## v0.1.2 - unreleased
 
+- 💥 BREAKING: Removed the shadow DOM content wrapper,
+  and all shadow DOM styles
 - 💥 BREAKING: Renamed and added control-panel parts,
-  to allow for more customization
-- 🚀 NEW: Basic control panel styles
+  to allow for more customization of the default panel
+- 🚀 NEW: Default styles are in `slide-deck.css`
+  and can be applied from the light DOM
+- 🚀 NEW: The entire control panel can be replaced
+  from the light DOM using `slot=control-panel`
+  on a slotted `dialog` element
 - 🐞 FIXED: Slotted controls are no longer treated as slides
 
 ## v0.1.1 - 2023-12-26
