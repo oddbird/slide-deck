@@ -188,6 +188,9 @@ class slideDeck extends HTMLElement {
     this[slideDeck.attrToPropMap[name]] = newValue || this.hasAttribute(name);
 
     switch (name) {
+      case 'key-control':
+        this.keyControlChange();
+        break;
       case 'follow-active':
         this.followActiveChange();
         break;
@@ -433,6 +436,12 @@ class slideDeck extends HTMLElement {
   }
 
   // dynamic attribute methods
+  keyControlChange = () => {
+    if (this.keyControl) {
+      this.goToSaved();
+    }
+  }
+
   followActiveChange = () => {
     if (this.followActive) {
       this.goToSaved();
@@ -448,9 +457,9 @@ class slideDeck extends HTMLElement {
   slideFromHash = () => window.location.hash.startsWith('#slide_')
     ? this.asSlideInt(window.location.hash.split('-').pop())
     : null;
-  slideFromStore = () => this.asSlideInt(
+  slideFromStore = (fallback = 1) => this.asSlideInt(
     localStorage.getItem(this.store.slide)
-  );
+  ) || fallback;
 
   slideToHash = (to) => {
     if (to) {

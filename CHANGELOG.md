@@ -4,6 +4,13 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.1.2 - unreleased
+
+- 🚀 NEW: When `key-control` is activated (including on-load),
+  we target the stored active slide (or the first slide)
+- 🐞 FIXED: When restoring the active slide from memory,
+  we go to the first slide if there's no stored state
+
 ## v0.1.1 - 2023-12-26
 
 - 💥 BREAKING: Updated keyboard shortcuts
