@@ -1,7 +1,11 @@
 slide-deck {
+  --color-dark: #1e1e1e;
+  --color-light: white;
   --gap: clamp(8px, 0.25em + 1vw, 16px);
+  color: var(--text-color);
   container: slide-deck / inline-size;
   display: grid;
+  min-height: 100vh;
 
   &[slide-view=grid] {
     --slide-ratio: 16/9;
@@ -18,13 +22,20 @@ slide-deck {
 
   &[blank-slide]::after {
     content: '';
-    background-color: var(--blank-color, black);
+    background-color: var(--blank-color);
     position: absolute;
     inset: 0;
+    z-index: -1;
+  }
+
+  &[blank-slide=black] {
+    --blank-color: var(--color-dark);
+    --text-color: var(--color-light);
   }
 
   &[blank-slide=white] {
-    --blank-color: white;
+    --blank-color: var(--color-light);
+    --text-color: var(--color-dark);
   }
 
   [slide-canvas] {
