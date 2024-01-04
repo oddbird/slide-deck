@@ -3,127 +3,54 @@ class slideDeck extends HTMLElement {
   static appendShadowTemplate = (node) => {
     const template = document.createElement("template");
     template.innerHTML = `
-      <dialog part="controls">
-        <form method="dialog"><button>close</button></form>
-        <div>
-          <slot name="slide-controls">
-            <button slide-event='toggleControl'>keyboard controls</button>
+      <slot></slot>
+      <slot name="control-panel">
+        <dialog part="control-panel">
+          <div part="panel-header">
+            <strong>Slide-Deck Controls</strong>
+            <form method="dialog"><button>close</button></form>
+          </div>
+          <div part="controls">
+            <button part="button" slide-event='toggleControl'>
+              keyboard navigation
+            </button>
 
+            <hr>
             <p><strong>Presentation:</strong></p>
-            <button slide-event>start</button>
-            <button slide-event>end</button>
-            <button slide-event="joinWithNotes">speaker view</button>
 
+            <button part="button event" slide-event>
+              start
+            </button>
+            <button part="button event" slide-event>
+              end
+            </button>
+            <button part="button event" slide-event="joinWithNotes">
+              speaker view
+            </button>
+
+            <hr>
             <p><strong>View:</strong></p>
-            <button set-view>grid</button>
-            <button set-view>list</button>
+
+            <button part="button view" set-view>
+              grid
+            </button>
+            <button part="button view" set-view>
+              list
+            </button>
 
             <p><strong>Hide:</strong></p>
-            <button hide-part="frame">slides</button>
-            <button hide-part="note">notes</button>
-          </slot>
-        </div>
-      </dialog>
-      <div part="contents">
-        <slot></slot>
-      </div>
+            <button part="button hide" hide-part="canvas">
+              slides
+            </button>
+            <button part="button hide" hide-part="note">
+              notes
+            </button>
+          </div>
+        </dialog>
+      </slot>
     `;
     const shadowRoot = node.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
-  }
-
-  // css
-  static adoptShadowStyles = (node) => {
-    const shadowStyle = new CSSStyleSheet();
-    shadowStyle.replaceSync(`
-      :host {
-        position: relative;
-      }
-
-      :host:not(:fullscreen) {
-        container: host / inline-size;
-      }
-
-      :host(:fullscreen) {
-        background-color: white;
-        overflow-x: clip;
-        overflow-y: auto;
-      }
-
-      :host([slide-view=grid]) {
-        ---slide-grid-ratio: 16/9;
-        ---slide-grid-border: var(--slide-grid-border, thin solid);
-        ---slide-grid-active-outline: medium dotted hotpink;
-        ---slide-grid-scroll-margin: clamp(10px, 4cqi, 40px);
-        ---slide-list-border: var(--slide-grid-border, thin solid);
-      }
-
-      :host([slide-view=list]) {
-        ---slide-list-border: var(--slide-list-border, thin solid);
-      }
-
-      :host([blank-slide])::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-color: var(--blank-slide-color, black);
-      }
-
-      :host([blank-slide='white'])::after {
-        --blank-slide-color: white;
-      }
-
-      [part=contents] {
-        ---slide-gap: clamp(5px, 1.5cqi, 15px);
-        display: grid;
-
-        :host([slide-view=grid]) & {
-          grid-template-columns: var(
-            --slide-grid-columns,
-            repeat(auto-fit, minmax(min(50ch, 100%), 1fr))
-          );
-          gap: var(--slide-grid-gap, var(---slide-gap));
-          padding: var(--slide-grid-padding, var(---slide-gap));
-        }
-
-        :host([slide-view=list]) & {
-          grid-auto-rows: var(--slide-list-rows, 100svh);
-        }
-      }
-
-      ::slotted([id^=slide_]) {
-        container-name: slide;
-        container-type: var(--slide-container, inline-size);
-        scroll-margin: var(
-          --slide-grid-scroll-margin,
-          var(---slide-grid-scroll-margin)
-        );
-      }
-
-      ::slotted([slide-frame]) {
-        aspect-ratio: var(--slide-grid-ratio, var(---slide-grid-ratio));
-        border: var(---slide-grid-border);
-        border-block-end: var(---slide-list-border);
-        padding: var(---slide-gap);
-      }
-
-      ::slotted([id^=slide_]:target) {
-        outline: var(
-          --slide-grid-active-outline,
-          var(---slide-grid-active-outline)
-        );
-        outline-offset: var(--slide-active-outline-offset, 3px);
-      }
-
-      button[aria-pressed=true] {
-        box-shadow: inset 0 0 2px black;
-
-        &::before {
-          content: ' ✅ ';
-        }
-      }
-    `);
-    node.shadowRoot.adoptedStyleSheets = [shadowStyle];
   }
 
   // static
@@ -187,7 +114,7 @@ class slideDeck extends HTMLElement {
   store = {};
   slides;
   slideNotes;
-  slideFrames;
+  slideCanvas;
   slideCount;
   activeSlide;
   controlPanel;
@@ -200,6 +127,9 @@ class slideDeck extends HTMLElement {
     this[slideDeck.attrToPropMap[name]] = newValue || this.hasAttribute(name);
 
     switch (name) {
+      case 'key-control':
+        this.#keyControlChange();
+        break;
       case 'follow-active':
         this.#followActiveChange();
         this.#updateEventButtons();
@@ -224,15 +154,15 @@ class slideDeck extends HTMLElement {
 
     // shadow dom and ID
     slideDeck.appendShadowTemplate(this);
-    slideDeck.adoptShadowStyles(this);
     this.#setDeckID();
 
     // relevant nodes
     this.#body = document.querySelector('body');
-    this.controlPanel = this.shadowRoot.querySelector(`[part="controls"]`);
-    this.slides = this.querySelectorAll(':scope > :not([slot=slide-controls])');
+    this.controlPanel = this.querySelector(`[slot="control-panel"]`) ??
+      this.shadowRoot.querySelector(`[part="control-panel"]`);
+    this.slides = this.querySelectorAll(':scope > :not([slot])');
     this.slideNotes = this.querySelectorAll('[slide-note]');
-    this.slideFrames = this.querySelectorAll('[slide-frame]:not(:scope > *)');
+    this.slideCanvas = this.querySelectorAll('[slide-canvas]:not(:scope > *)');
 
     // initial setup
     this.slideCount = this.slides.length;
@@ -263,7 +193,7 @@ class slideDeck extends HTMLElement {
     this.addEventListener('grid', (e) => this.toggleView('grid'));
     this.addEventListener('list', (e) => this.toggleView('list'));
 
-    this.addEventListener('toggleFrame', (e) => this.togglePart('frame'));
+    this.addEventListener('toggleCanvas', (e) => this.togglePart('canvas'));
     this.addEventListener('toggleNote', (e) => this.togglePart('note'));
     this.addEventListener('showAll', (e) => this.removeAttribute('hide-parts'));
 
@@ -312,14 +242,12 @@ class slideDeck extends HTMLElement {
   #slideId = (n) => `slide_${this.id}-${n}`;
 
   #setupSlides = () => {
-    const slides = this.querySelectorAll(':scope > *');
-
-    slides.forEach((slide, index) => {
+    this.slides.forEach((slide, index) => {
       slide.id = this.#slideId(index + 1);
-      if (slide.querySelector('[slide-frame]')) {
-        slide.toggleAttribute('slide-group', true);
+      if (slide.querySelector('[slide-canvas]')) {
+        slide.toggleAttribute('slide-container', true);
       } else {
-        slide.toggleAttribute('slide-frame', true);
+        slide.toggleAttribute('slide-canvas', true);
       }
     });
   };
@@ -342,9 +270,28 @@ class slideDeck extends HTMLElement {
 
   #getButtonValue = (btn, attr) => btn.getAttribute(attr) || btn.innerText;
 
+  #setButtonPressed = (btn, isPressed) => {
+    btn.setAttribute('aria-pressed', isPressed);
+
+    if (btn.hasAttribute('part')) {
+      const currentNames = btn.getAttribute('part').split(' ');
+      let newNames;
+
+      if (isPressed) {
+        newNames = currentNames.includes('pressed')
+          ? currentNames
+          : [...currentNames, 'pressed'];
+      } else if (!isPressed) {
+        newNames = currentNames.filter((name) => name !== 'pressed')
+      }
+
+      btn.setAttribute('part', newNames.join(' '));
+    }
+  }
+
   #setToggleState = (btn, attr, state) => {
     const isActive = this.#getButtonValue(btn, attr) === state;
-    btn.setAttribute('aria-pressed', isActive);
+    this.#setButtonPressed(btn, isActive);
   }
 
   #setupViewButtons = () => {
@@ -403,30 +350,29 @@ class slideDeck extends HTMLElement {
 
       let isActive = {
         'toggleControl': this.keyControl,
-        'toggleFrame': this.hideParts === 'frame',
+        'toggleCanvas': this.hideParts === 'canvas',
         'toggleNote': this.hideParts === 'note',
         'toggleFollow': this.followActive,
         'toggleFullscreen': this.fullScreen,
       }
 
       if (Object.keys(isActive).includes(btnEvent)) {
-        btn.setAttribute('aria-pressed', isActive[btnEvent]);
+        this.#setButtonPressed(btn, isActive[btnEvent]);
       }
     });
   }
 
   // event handlers
   toggleView = (to) => {
-    let next;
-
-    if (!to) {
+    let next = to;
+    if (!next) {
       const current = this.getAttribute('slide-view');
-      const l = slideDeck.slideViews - 1; // adjust for 0-index
-      const i = slideDeck.slideViews.indexOf(current);
+      const l = slideDeck.slideViews.length;
+      const i = slideDeck.slideViews.indexOf(current) || 0;
       next = slideDeck.slideViews[(i + 1) % l];
     }
 
-    this.setAttribute('slide-view', to || next || 'grid');
+    this.setAttribute('slide-view', next || 'grid');
   }
 
   togglePart = (type = 'note') => {
@@ -495,6 +441,12 @@ class slideDeck extends HTMLElement {
   }
 
   // dynamic attribute methods
+  #keyControlChange = () => {
+    if (this.keyControl) {
+      this.goToSaved();
+    }
+  }
+
   #followActiveChange = () => {
     if (this.followActive) {
       this.goToSaved();
@@ -509,8 +461,8 @@ class slideDeck extends HTMLElement {
       note.toggleAttribute('hidden', this.hideParts === 'note');
     });
 
-    this.slideFrames.forEach((frame) => {
-      frame.toggleAttribute('hidden', this.hideParts === 'frame');
+    this.slideCanvas.forEach((canvas) => {
+      canvas.toggleAttribute('hidden', this.hideParts === 'canvas');
     });
   }
 
@@ -520,9 +472,10 @@ class slideDeck extends HTMLElement {
   #slideFromHash = () => window.location.hash.startsWith('#slide_')
     ? this.#asSlideInt(window.location.hash.split('-').pop())
     : null;
-  #slideFromStore = () => this.#asSlideInt(
+
+  #slideFromStore = (fallback = 1) => this.#asSlideInt(
     localStorage.getItem(this.store.slide)
-  );
+  ) || fallback;
 
   #slideToHash = (to) => {
     if (to) {

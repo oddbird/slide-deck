@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="color-scheme: light dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Demo of slide-deck Web Component" />
     <title>Slide-Deck Web Component Demo</title>
-
+    <link rel="stylesheet" href="slide-deck.css">
+    <style>body { margin: 0; }</style>
     <script type="module" src="slide-deck.js"></script>
   </head>
   <body>
@@ -82,6 +83,7 @@
           <button slide-event>previous</button>
           <button slide-event>next</button>
           <button slide-event="start">restart</button>
+          <button slide-event="toggleView">toggle view</button>
         </div>
       </div>
       <div>
@@ -90,6 +92,10 @@
           <button set-view>list</button>
           <button set-view>grid</button>
         </div>
+      </div>
+      <div>
+        <h2>Custom Control Panel</h2>
+        <a href="./custom-panel.html">Example</a>
       </div>
       <div><h2>Speaker View</h2></div>
       <div>
@@ -100,37 +106,51 @@
       </div>
 
       <div>
-        <style>
-          style ~ [slide-frame] {
-            aspect-ratio: 16/9;
-            border: thin dotted maroon;
-            padding: 1em;
-          }
-          style ~ [slide-note] {
-            padding-block: 0.5lh;
-          }
-        </style>
-        <div slide-frame>
+        <div slide-canvas>
           <h2>Speaker Notes</h2>
-          <pre><code>&lt;div slide-frame&gt;
-  This slide has both a frame
-&lt;/div&gt;
-&lt;div slide-note&gt;
-  And a section for notes
+          <pre><code>&lt;div&gt;
+  &lt;div slide-canvas&gt;
+    This slide has both a canvas
+  &lt;/div&gt;
+  &lt;div slide-note&gt;
+    And a section for notes
+  &lt;/div&gt;
 &lt;/div&gt;</code></pre>
         </div>
         <div slide-note>
-          We can also add notes to slides.
-          But the frame can't be styled
-          by shadow DOM CSS,
-          so this format is
-          <em>bring-your-own-styles</em>.
-          That also means we can use the
-          parent element as a container!
+          <p>
+            Within a slide element,
+            we can provide both a 'canvas' and a 'note'!
+            For styling purposes:
+          </p>
+          <ul>
+            <li>
+              A slide without nested parts
+              will be labeled
+              with the <code>slide-canvas</code> attribute
+            </li>
+            <li>
+              A slide with internal parts
+              will be labeled
+              as a <code>slide-container</code> instead
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div slide-canvas>
+          <h3>Hiding parts</h3>
+          <button hide-part="note">hide notes</button>
+          <button hide-part="canvas">hide canvas</button>
+        </div>
+        <div slide-note>
+          <p>
+            These parts can be shown or hidden separately,
+            but you can never hide both at once.
+          </p>
         </div>
       </div>
       <div><h2>To Do…</h2></div>
-      <div><h3>… Speaker Notes</h3></div>
       <div><h3>… Slide Templates</h3></div>
       <div><h3>… CSS Themes</h3></div>
       <div><h3>… More Better Good Stuff</h3></div>

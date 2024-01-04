@@ -6,13 +6,27 @@ until we achieve a stable v1.0 release
 
 ## v0.1.2 - unreleased
 
-- 🚀 NEW: Add support for slide parts – `slide-frame` & `slide-note`
+- 🚀 NEW: Add support for slide parts – `slide-canvas` & `slide-note`
   (these parts require light DOM styles)
 - 🚀 NEW: Slide parts can be hidden
-  with the `hide-parts="note | frame"` attribute
+  with the `hide-parts="note | canvas"` attribute
   (both parts cannot be hidden at the same time)
-- 🚀 NEW: Add support for `hide-part="note | frame"` buttons
-  to toggle hiding the notes and frames
+- 🚀 NEW: Add support for `hide-part="note | canvas"` buttons
+  to toggle hiding the notes and canvass
+- 💥 BREAKING: Removed the shadow DOM content wrapper,
+  and all shadow DOM styles
+- 💥 BREAKING: Renamed and added control-panel parts,
+  to allow for more customization of the default panel
+- 🚀 NEW: Default styles are in `slide-deck.css`
+  and can be applied from the light DOM
+- 🚀 NEW: The entire control panel can be replaced
+  from the light DOM using `slot=control-panel`
+  on a slotted `dialog` element
+- 🐞 FIXED: Slotted controls are no longer treated as slides
+- 🚀 NEW: When `key-control` is activated (including on-load),
+  we target the stored active slide (or the first slide)
+- 🐞 FIXED: When restoring the active slide from memory,
+  we go to the first slide if there's no stored state
 
 ## v0.1.1 - 2023-12-26
 
