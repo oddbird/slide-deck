@@ -136,12 +136,14 @@ class slideDeck extends HTMLElement {
 
     // relevant nodes
     this.body = document.querySelector('body');
-    this.controlPanel = this.shadowRoot.querySelector(`[part="control-panel"]`);
+    this.controlPanel = this.querySelector(`[slot="control-panel"]`) ??
+      this.shadowRoot.querySelector(`[part="control-panel"]`);
 
     // initial setup
-    this.slideCount = this.childElementCount;
+    const slides = this.querySelectorAll(':scope > :not([slot])');
+    this.slideCount = slides.length;
     this.defaultAttrs();
-    this.setSlideIDs();
+    this.setSlideIDs(slides);
     this.goTo();
 
     // buttons
@@ -210,9 +212,7 @@ class slideDeck extends HTMLElement {
 
   slideId = (n) => `slide_${this.id}-${n}`;
 
-  setSlideIDs = () => {
-    const slides = this.querySelectorAll(':scope > :not([slot=controls])');
-
+  setSlideIDs = (slides) => {
     slides.forEach((slide, index) => {
       slide.id = this.slideId(index + 1);
     });
