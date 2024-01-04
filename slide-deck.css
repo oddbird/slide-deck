@@ -1,0 +1,73 @@
+slide-deck {
+  --gap: clamp(8px, 0.25em + 1vw, 16px);
+  container: slide-deck / inline-size;
+  display: grid;
+
+  &[slide-view=grid] {
+    --slide-ratio: 16/9;
+    --target-outline: medium dotted;
+    --target-margin: var(--gap);
+    gap: var(--gap);
+    grid-template-columns: repeat(auto-fill, minmax(min(50ch, 100%), 1fr));
+    padding: var(--gap);
+  }
+
+  &[slide-view=list] {
+    --slide-height: 100svh;
+  }
+
+  &[blank-slide]::after {
+    content: '';
+    background-color: var(--blank-color, black);
+    position: absolute;
+    inset: 0;
+  }
+
+  &[blank-slide=white] {
+    --blank-color: white;
+  }
+
+  [id^=slide_] {
+    aspect-ratio: var(--slide-ratio);
+    border: thin solid;
+    box-sizing: border-box;
+    container: slide-item / inline-size;
+    min-height: var(--slide-height);
+    padding: var(--gap);
+    scroll-margin-block: var(--target-margin);
+
+    &:target {
+      outline: var(--target-outline);
+      outline-offset: calc(var(--gap) * 0.5);
+    }
+  }
+
+  &::part(control-panel) {
+    min-width: min(50ch, 100%);
+    padding: 0;
+  }
+
+  &::part(panel-header) {
+    border-block-end: thin solid;
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: 1fr auto;
+    padding: var(--gap);
+  }
+
+  &::part(controls) {
+    padding: var(--gap);
+  }
+
+  button,
+  &::part(button) {
+    font: inherit;
+    padding-inline: var(--gap);
+    border: medium solid transparent;
+  }
+
+  [aria-pressed=true],
+  &::part(button pressed) {
+    border-color: currentColor;
+  }
+}

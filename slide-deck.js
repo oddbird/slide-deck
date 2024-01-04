@@ -3,120 +3,42 @@ class slideDeck extends HTMLElement {
   static appendShadowTemplate = (node) => {
     const template = document.createElement("template");
     template.innerHTML = `
-      <dialog part="controls">
-        <form method="dialog"><button>close</button></form>
-        <div>
-          <slot name="slide-controls">
-            <button slide-event='toggleControl'>keyboard controls</button>
+      <slot></slot>
+      <slot name="control-panel">
+        <dialog part="control-panel">
+          <div part="panel-header">
+            <strong>Slide-Deck Controls</strong>
+            <form method="dialog"><button>close</button></form>
+          </div>
+          <div part="controls">
+            <button part="button" slide-event='toggleControl'>
+              keyboard navigation
+            </button>
 
+            <hr>
             <p><strong>Presentation:</strong></p>
-            <button slide-event>start</button>
-            <button slide-event>end</button>
-            <button slide-event="joinWithNotes">speaker view</button>
 
+            <button part="button event" slide-event>
+              start
+            </button>
+            <button part="button event" slide-event>
+              end
+            </button>
+            <button part="button event" slide-event="joinWithNotes">
+              speaker view
+            </button>
+
+            <hr>
             <p><strong>View:</strong></p>
-            <button set-view>grid</button>
-            <button set-view>list</button>
-          </slot>
-        </div>
-      </dialog>
-      <div part="contents">
-        <slot></slot>
-      </div>
+
+            <button part="button view" set-view>grid</button>
+            <button part="button view" set-view>list</button>
+          </div>
+        </dialog>
+      </slot>
     `;
     const shadowRoot = node.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
-  }
-
-  // css
-  static adoptShadowStyles = (node) => {
-    const shadowStyle = new CSSStyleSheet();
-    shadowStyle.replaceSync(`
-      :host {
-        position: relative;
-      }
-
-      :host:not(:fullscreen) {
-        container: host / inline-size;
-      }
-
-      :host(:fullscreen) {
-        background-color: white;
-        overflow-x: clip;
-        overflow-y: auto;
-      }
-
-      :host([slide-view=grid]) {
-        ---slide-grid-ratio: 16/9;
-        ---slide-grid-border: var(--slide-grid-border, thin solid);
-        ---slide-grid-active-outline: medium dotted hotpink;
-        ---slide-grid-scroll-margin: clamp(10px, 4cqi, 40px);
-        ---slide-list-border: var(--slide-grid-border, thin solid);
-      }
-
-      :host([slide-view=list]) {
-        ---slide-list-border: var(--slide-list-border, thin solid);
-      }
-
-      :host([blank-slide])::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-color: var(--blank-slide-color, black);
-      }
-
-      :host([blank-slide='white'])::after {
-        --blank-slide-color: white;
-      }
-
-      [part=contents] {
-        ---slide-gap: clamp(5px, 1.5cqi, 15px);
-        display: grid;
-
-        :host([slide-view=grid]) & {
-          grid-template-columns: var(
-            --slide-grid-columns,
-            repeat(auto-fit, minmax(min(50ch, 100%), 1fr))
-          );
-          gap: var(--slide-grid-gap, var(---slide-gap));
-          padding: var(--slide-grid-padding, var(---slide-gap));
-        }
-
-        :host([slide-view=list]) & {
-          grid-auto-rows: var(--slide-list-rows, 100svh);
-        }
-      }
-
-      ::slotted([id^=slide_]) {
-        aspect-ratio: var(--slide-grid-ratio, var(---slide-grid-ratio));
-        container-name: slide;
-        container-type: var(--slide-container, inline-size);
-        border: var(---slide-grid-border);
-        border-block-end: var(---slide-list-border);
-        padding: var(---slide-gap);
-        scroll-margin: var(
-          --slide-grid-scroll-margin,
-          var(---slide-grid-scroll-margin)
-        );
-      }
-
-      ::slotted([id^=slide_]:target) {
-        outline: var(
-          --slide-grid-active-outline,
-          var(---slide-grid-active-outline)
-        );
-        outline-offset: var(--slide-active-outline-offset, 3px);
-      }
-
-      button[aria-pressed=true] {
-        box-shadow: inset 0 0 2px black;
-
-        &::before {
-          content: ' ✅ ';
-        }
-      }
-    `);
-    node.shadowRoot.adoptedStyleSheets = [shadowStyle];
   }
 
   // static
@@ -210,17 +132,18 @@ class slideDeck extends HTMLElement {
 
     // shadow dom and ID
     slideDeck.appendShadowTemplate(this);
-    slideDeck.adoptShadowStyles(this);
     this.setDeckID();
 
     // relevant nodes
     this.body = document.querySelector('body');
-    this.controlPanel = this.shadowRoot.querySelector(`[part="controls"]`);
+    this.controlPanel = this.querySelector(`[slot="control-panel"]`) ??
+      this.shadowRoot.querySelector(`[part="control-panel"]`);
 
     // initial setup
-    this.slideCount = this.childElementCount;
+    const slides = this.querySelectorAll(':scope > :not([slot])');
+    this.slideCount = slides.length;
     this.defaultAttrs();
-    this.setSlideIDs();
+    this.setSlideIDs(slides);
     this.goTo();
 
     // buttons
@@ -289,9 +212,7 @@ class slideDeck extends HTMLElement {
 
   slideId = (n) => `slide_${this.id}-${n}`;
 
-  setSlideIDs = () => {
-    const slides = this.querySelectorAll(':scope > *');
-
+  setSlideIDs = (slides) => {
     slides.forEach((slide, index) => {
       slide.id = this.slideId(index + 1);
     });
@@ -309,6 +230,24 @@ class slideDeck extends HTMLElement {
 
   // buttons
   getButtonEvent = (btn) => btn.getAttribute('slide-event') || btn.innerText;
+  setPressed = (btn, isPressed) => {
+    btn.setAttribute('aria-pressed', isPressed);
+
+    if (btn.hasAttribute('part')) {
+      const currentNames = btn.getAttribute('part').split(' ');
+      let newNames;
+
+      if (isPressed) {
+        newNames = currentNames.includes('pressed')
+          ? currentNames
+          : [...currentNames, 'pressed'];
+      } else if (!isPressed) {
+        newNames = currentNames.filter((name) => name !== 'pressed')
+      }
+
+      btn.setAttribute('part', newNames.join(' '));
+    }
+}
 
   updateEventButtons = () => {
     this.eventButtons.forEach((btn) => {
@@ -320,7 +259,7 @@ class slideDeck extends HTMLElement {
       }
 
       if (Object.keys(isActive).includes(btnEvent)) {
-        btn.setAttribute('aria-pressed', isActive[btnEvent]);
+        this.setPressed(btn, isActive[btnEvent]);
       }
     });
   }
@@ -362,7 +301,7 @@ class slideDeck extends HTMLElement {
   updateViewButtons = () => {
     this.viewButtons.forEach((btn) => {
       const isActive = this.getButtonView(btn) === this.slideView;
-      btn.setAttribute('aria-pressed', isActive);
+      this.setPressed(btn, isActive);
     });
   }
 
