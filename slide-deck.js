@@ -35,15 +35,10 @@ class slideDeck extends HTMLElement {
               grid
             </button>
             <button part="button view" set-view>
-              list
+              solo
             </button>
-
-            <p><strong>Hide:</strong></p>
-            <button part="button hide" hide-part="canvas">
-              slides
-            </button>
-            <button part="button hide" hide-part="note">
-              notes
+            <button part="button view" set-view>
+              script
             </button>
           </div>
         </dialog>
@@ -59,7 +54,6 @@ class slideDeck extends HTMLElement {
     'follow-active',
     'full-screen',
     'slide-view',
-    'hide-parts',
   ];
 
   static attrToPropMap = {
@@ -67,7 +61,6 @@ class slideDeck extends HTMLElement {
     'follow-active': 'followActive',
     'full-screen': 'fullScreen',
     'slide-view': 'slideView',
-    'hide-parts': 'hideParts',
   };
 
   static storageKeys = [
@@ -79,7 +72,8 @@ class slideDeck extends HTMLElement {
 
   static slideViews = [
     'grid',
-    'list',
+    'solo',
+    'script',
   ];
 
   static controlKeys = {
@@ -134,10 +128,6 @@ class slideDeck extends HTMLElement {
         this.#followActiveChange();
         this.#updateEventButtons();
         break;
-      case 'hide-parts':
-        this.#hidePartsChange();
-        this.#updatePartButtons();
-        break;
       case 'slide-view':
         this.#updateViewButtons();
         this.scrollToActive();
@@ -173,7 +163,6 @@ class slideDeck extends HTMLElement {
     // buttons
     this.#setupEventButtons();
     this.#setupViewButtons();
-    this.#setupPartButtons();
 
     // event listeners
     this.shadowRoot.addEventListener('keydown', (event) => {
@@ -191,11 +180,8 @@ class slideDeck extends HTMLElement {
     this.addEventListener('toggleFullscreen', (e) => this.fullScreenEvent());
     this.addEventListener('toggleView', (e) => this.toggleView());
     this.addEventListener('grid', (e) => this.toggleView('grid'));
-    this.addEventListener('list', (e) => this.toggleView('list'));
-
-    this.addEventListener('toggleCanvas', (e) => this.togglePart('canvas'));
-    this.addEventListener('toggleNote', (e) => this.togglePart('note'));
-    this.addEventListener('showAll', (e) => this.removeAttribute('hide-parts'));
+    this.addEventListener('solo', (e) => this.toggleView('solo'));
+    this.addEventListener('script', (e) => this.toggleView('script'));
 
     this.addEventListener('join', (e) => this.joinEvent());
     this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
@@ -312,24 +298,6 @@ class slideDeck extends HTMLElement {
     });
   }
 
-  #setupPartButtons = () => {
-    this.hideParts = this.hideParts || this.getAttribute('hide-parts');
-    this.partButtons = this.#findButtons('hide-part');
-
-    this.partButtons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        this.togglePart(this.#getButtonValue(btn, 'hide-part'));
-      });
-      this.#setToggleState(btn, 'hide-part', this.hideParts);
-    });
-  }
-
-  #updatePartButtons = () => {
-    this.partButtons.forEach((btn) => {
-      this.#setToggleState(btn, 'hide-part', this.hideParts);
-    });
-  }
-
   // event buttons
   #setupEventButtons = () => {
     this.eventButtons = this.#findButtons('slide-event');
@@ -350,8 +318,6 @@ class slideDeck extends HTMLElement {
 
       let isActive = {
         'toggleControl': this.keyControl,
-        'toggleCanvas': this.hideParts === 'canvas',
-        'toggleNote': this.hideParts === 'note',
         'toggleFollow': this.followActive,
         'toggleFullscreen': this.fullScreen,
       }
@@ -375,15 +341,8 @@ class slideDeck extends HTMLElement {
     this.setAttribute('slide-view', next || 'grid');
   }
 
-  togglePart = (type = 'note') => {
-    this.hideParts === type
-      ? this.removeAttribute('hide-parts')
-      : this.setAttribute('hide-parts', type);
-  }
-
   #startPresenting = () => {
-    this.setAttribute('hide-parts', 'note');
-    this.setAttribute('slide-view', 'list');
+    this.setAttribute('slide-view', 'solo');
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
   }
@@ -399,8 +358,7 @@ class slideDeck extends HTMLElement {
   }
 
   joinWithNotesEvent = () => {
-    if (this.hideParts === 'note') { this.removeAttribute('hide-parts'); }
-    this.setAttribute('slide-view', 'grid');
+    this.setAttribute('slide-view', 'script');
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
   }
@@ -454,16 +412,6 @@ class slideDeck extends HTMLElement {
     } else {
       window.removeEventListener('storage', (e) => this.goToSaved());
     }
-  }
-
-  #hidePartsChange = () => {
-    this.slideNotes.forEach((note) => {
-      note.toggleAttribute('hidden', this.hideParts === 'note');
-    });
-
-    this.slideCanvas.forEach((canvas) => {
-      canvas.toggleAttribute('hidden', this.hideParts === 'canvas');
-    });
   }
 
   // storage

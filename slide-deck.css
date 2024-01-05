@@ -12,7 +12,7 @@ slide-deck {
     padding: var(--gap);
   }
 
-  &[slide-view=list] {
+  &[slide-view=solo] {
     --slide-height: 100svh;
   }
 
