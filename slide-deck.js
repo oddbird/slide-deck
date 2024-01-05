@@ -178,10 +178,6 @@ class slideDeck extends HTMLElement {
     this.addEventListener('toggleControl', (e) => this.toggleAttribute('key-control'));
     this.addEventListener('toggleFollow', (e) => this.toggleAttribute('follow-active'));
     this.addEventListener('toggleFullscreen', (e) => this.fullScreenEvent());
-    this.addEventListener('toggleView', (e) => this.toggleView());
-    this.addEventListener('grid', (e) => this.toggleView('grid'));
-    this.addEventListener('solo', (e) => this.toggleView('solo'));
-    this.addEventListener('script', (e) => this.toggleView('script'));
 
     this.addEventListener('join', (e) => this.joinEvent());
     this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
@@ -329,18 +325,6 @@ class slideDeck extends HTMLElement {
   }
 
   // event handlers
-  toggleView = (to) => {
-    let next = to;
-    if (!next) {
-      const current = this.getAttribute('slide-view');
-      const l = slideDeck.slideViews.length;
-      const i = slideDeck.slideViews.indexOf(current) || 0;
-      next = slideDeck.slideViews[(i + 1) % l];
-    }
-
-    this.setAttribute('slide-view', next || 'grid');
-  }
-
   #startPresenting = () => {
     this.setAttribute('slide-view', 'solo');
     this.setAttribute('key-control', '');
