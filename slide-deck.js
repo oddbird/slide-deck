@@ -150,12 +150,8 @@ class slideDeck extends HTMLElement {
     this.#body = document.querySelector('body');
     this.controlPanel = this.querySelector(`[slot="control-panel"]`) ??
       this.shadowRoot.querySelector(`[part="control-panel"]`);
-    this.slides = this.querySelectorAll(':scope > :not([slot])');
-    this.slideNotes = this.querySelectorAll('[slide-note]');
-    this.slideCanvas = this.querySelectorAll('[slide-canvas]:not(:scope > *)');
 
     // initial setup
-    this.slideCount = this.slides.length;
     this.#defaultAttrs();
     this.#setupSlides();
     this.goTo();
@@ -224,14 +220,32 @@ class slideDeck extends HTMLElement {
   #slideId = (n) => `slide_${this.id}-${n}`;
 
   #setupSlides = () => {
+    this.slides = this.querySelectorAll(':scope > :not([slot])');
+    this.slideCount = this.slides.length;
+    this.style.setProperty('--slide-count', this.slideCount);
+
     this.slides.forEach((slide, index) => {
-      slide.id = this.#slideId(index + 1);
-      if (slide.querySelector('[slide-canvas]')) {
-        slide.toggleAttribute('slide-container', true);
+      const slideIndex = index + 1;
+      slide.id = this.#slideId(slideIndex);
+      slide.style.setProperty('--slide-index', slideIndex);
+
+      if (slide.querySelector(':scope [slide-canvas]')) {
+        if (!slide.hasAttribute('slide-item')) {
+          slide.setAttribute('slide-item', 'container');
+        }
       } else {
-        slide.toggleAttribute('slide-canvas', true);
+        if (!slide.hasAttribute('slide-item')) {
+          slide.setAttribute('slide-item', 'canvas');
+        }
+
+        if (!slide.hasAttribute('slide-canvas')) {
+          slide.toggleAttribute('slide-canvas', true);
+        }
       }
     });
+
+    this.slideNotes = this.querySelectorAll(':scope [slide-note]');
+    this.slideCanvas = this.querySelectorAll(':scope [slide-canvas]');
   };
 
   #defaultAttrs = () => {
@@ -246,7 +260,7 @@ class slideDeck extends HTMLElement {
 
   // buttons
   #findButtons = (attr) => [
-    ...this.querySelectorAll(`button[${attr}]`),
+    ...this.querySelectorAll(`:scope button[${attr}]`),
     ...this.shadowRoot.querySelectorAll(`button[${attr}]`),
   ];
 
@@ -400,9 +414,10 @@ class slideDeck extends HTMLElement {
 
   // storage
   #asSlideInt = (string) => parseInt(string, 10);
+  #indexFromId = (string) => this.#asSlideInt(string.split('-').pop());
 
   #slideFromHash = () => window.location.hash.startsWith('#slide_')
-    ? this.#asSlideInt(window.location.hash.split('-').pop())
+    ? this.#indexFromId(window.location.hash)
     : null;
 
   #slideFromStore = (fallback = 1) => this.#asSlideInt(
@@ -445,6 +460,15 @@ class slideDeck extends HTMLElement {
       if (setTo !== fromHash) {
         this.#slideToHash(setTo);
       }
+
+      // update aria-current
+      this.querySelectorAll(
+        ':scope [slide-item][aria-current]'
+      ).forEach((slide) => {
+        slide.removeAttribute('aria-current');
+      });
+
+      this.querySelector(`:scope #${this.#slideId(setTo)}`).setAttribute('aria-current', 'true');
     }
   }
 

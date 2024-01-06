@@ -83,14 +83,14 @@
           <button slide-event>previous</button>
           <button slide-event>next</button>
           <button slide-event="start">restart</button>
-          <button slide-event="toggleView">toggle view</button>
         </div>
       </div>
       <div>
-        <h2><code>&lt;button set-view&gt;list&lt;button&gt;</code></h2>
+        <h2><code>&lt;button set-view&gt;solo&lt;button&gt;</code></h2>
         <div>
-          <button set-view>list</button>
+          <button set-view>solo</button>
           <button set-view>grid</button>
+          <button set-view>script</button>
         </div>
       </div>
       <div>
@@ -125,29 +125,16 @@
           </p>
           <ul>
             <li>
-              A slide without nested parts
-              will be labeled
-              with the <code>slide-canvas</code> attribute
-            </li>
-            <li>
               A slide with internal parts
               will be labeled
-              as a <code>slide-container</code> instead
+              as a <code>slide-item="container"</code>
+            </li>
+            <li>
+              A slide without nested parts
+              will get both <code>slide-item="canvas"</code>
+              and also the <code>slide-canvas</code> attribute
             </li>
           </ul>
-        </div>
-      </div>
-      <div>
-        <div slide-canvas>
-          <h3>Hiding parts</h3>
-          <button hide-part="note">hide notes</button>
-          <button hide-part="canvas">hide canvas</button>
-        </div>
-        <div slide-note>
-          <p>
-            These parts can be shown or hidden separately,
-            but you can never hide both at once.
-          </p>
         </div>
       </div>
       <div><h2>To Do…</h2></div>
