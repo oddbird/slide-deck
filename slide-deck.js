@@ -1,4 +1,3 @@
-// @ts-check
 class slideDeck extends HTMLElement {
   // template
   #appendShadowTemplate = () => {
@@ -57,12 +56,18 @@ class slideDeck extends HTMLElement {
     'slide-view',
   ];
 
-  static attrToPropMap = {
-    'key-control': 'keyControl',
-    'follow-active': 'followActive',
-    'full-screen': 'fullScreen',
-    'slide-view': 'slideView',
-  };
+  get keyControl(){
+    return this.hasAttribute('key-control');
+  }
+  get followActive(){
+    return this.hasAttribute('follow-active');
+  }
+  get fullScreen(){
+    return this.hasAttribute('full-screen');
+  }
+  get slideView(){
+    return this.getAttribute('slide-view');
+  }
 
   static storageKeys = [
     'control',
@@ -118,8 +123,7 @@ class slideDeck extends HTMLElement {
   #body;
 
   // callbacks
-  attributeChangedCallback(name, oldValue, newValue) {
-    this[slideDeck.attrToPropMap[name]] = newValue || this.hasAttribute(name);
+  attributeChangedCallback(name) {
 
     switch (name) {
       case 'key-control':
@@ -292,7 +296,6 @@ class slideDeck extends HTMLElement {
   }
 
   #setupViewButtons = () => {
-    this.slideView = this.slideView || this.getAttribute('slide-view');
     this.#viewButtons = this.#findButtons('set-view');
 
     this.#viewButtons.forEach((btn) => {
