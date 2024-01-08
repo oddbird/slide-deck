@@ -1,6 +1,7 @@
+// @ts-check
 class slideDeck extends HTMLElement {
   // template
-  static appendShadowTemplate = (node) => {
+  #appendShadowTemplate = () => {
     const template = document.createElement("template");
     template.innerHTML = `
       <slot></slot>
@@ -44,7 +45,7 @@ class slideDeck extends HTMLElement {
         </dialog>
       </slot>
     `;
-    const shadowRoot = node.attachShadow({ mode: "open" });
+    const shadowRoot = this.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
   }
 
@@ -105,15 +106,15 @@ class slideDeck extends HTMLElement {
   }
 
   // dynamic
-  store = {};
+  #store = {};
   slides;
   slideNotes;
   slideCanvas;
   slideCount;
   activeSlide;
-  controlPanel;
-  eventButtons;
-  viewButtons;
+  #controlPanel;
+  #eventButtons;
+  #viewButtons;
   #body;
 
   // callbacks
@@ -143,12 +144,12 @@ class slideDeck extends HTMLElement {
     super();
 
     // shadow dom and ID
-    slideDeck.appendShadowTemplate(this);
+    this.#appendShadowTemplate();
     this.#setDeckID();
 
     // relevant nodes
     this.#body = document.querySelector('body');
-    this.controlPanel = this.querySelector(`[slot="control-panel"]`) ??
+    this.#controlPanel = this.querySelector(`[slot="control-panel"]`) ??
       this.shadowRoot.querySelector(`[part="control-panel"]`);
 
     // initial setup
@@ -166,7 +167,7 @@ class slideDeck extends HTMLElement {
 
       if ((event.key === 'k' && event.metaKey) || event.key === 'Escape') {
         event.preventDefault();
-        this.controlPanel.close();
+        this.#controlPanel.close();
       }
     });
 
@@ -213,7 +214,7 @@ class slideDeck extends HTMLElement {
 
     // storage keys based on slide ID
     slideDeck.storageKeys.forEach((key) => {
-      this.store[key] = `${this.id}.${key}`;
+      this.#store[key] = `${this.id}.${key}`;
     });
   }
 
@@ -292,9 +293,9 @@ class slideDeck extends HTMLElement {
 
   #setupViewButtons = () => {
     this.slideView = this.slideView || this.getAttribute('slide-view');
-    this.viewButtons = this.#findButtons('set-view');
+    this.#viewButtons = this.#findButtons('set-view');
 
-    this.viewButtons.forEach((btn) => {
+    this.#viewButtons.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         this.setAttribute('slide-view', this.#getButtonValue(btn, 'set-view'));
       });
@@ -303,16 +304,16 @@ class slideDeck extends HTMLElement {
   }
 
   #updateViewButtons = () => {
-    this.viewButtons.forEach((btn) => {
+    this.#viewButtons.forEach((btn) => {
       this.#setToggleState(btn, 'set-view', this.slideView);
     });
   }
 
   // event buttons
   #setupEventButtons = () => {
-    this.eventButtons = this.#findButtons('slide-event');
+    this.#eventButtons = this.#findButtons('slide-event');
 
-    this.eventButtons.forEach((btn) => {
+    this.#eventButtons.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const event = this.#getButtonValue(btn, 'slide-event');
         this.dispatchEvent(new Event(event, { view: window, bubbles: false }));
@@ -323,7 +324,7 @@ class slideDeck extends HTMLElement {
   }
 
   #updateEventButtons = () => {
-    this.eventButtons.forEach((btn) => {
+    this.#eventButtons.forEach((btn) => {
       const btnEvent = this.#getButtonValue(btn, 'slide-event');
 
       let isActive = {
@@ -421,7 +422,7 @@ class slideDeck extends HTMLElement {
     : null;
 
   #slideFromStore = (fallback = 1) => this.#asSlideInt(
-    localStorage.getItem(this.store.slide)
+    localStorage.getItem(this.#store.slide)
   ) || fallback;
 
   #slideToHash = (to) => {
@@ -431,9 +432,9 @@ class slideDeck extends HTMLElement {
   };
   #slideToStore = (to) => {
     if (to) {
-      localStorage.setItem(this.store.slide, to);
+      localStorage.setItem(this.#store.slide, to);
     } else {
-      localStorage.removeItem(this.store.slide);
+      localStorage.removeItem(this.#store.slide);
     }
   };
 
@@ -475,7 +476,7 @@ class slideDeck extends HTMLElement {
   resetActive = () => {
     this.activeSlide = null;
     window.location.hash = this.id;
-    localStorage.removeItem(this.store.slide);
+    localStorage.removeItem(this.#store.slide);
   };
 
   move = (by) => {
@@ -493,7 +494,7 @@ class slideDeck extends HTMLElement {
       switch (event.key) {
         case 'k':
           event.preventDefault();
-          this.controlPanel.showModal();
+          this.#controlPanel.showModal();
           break;
         case 'f':
           if (event.shiftKey) {
