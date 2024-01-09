@@ -1,6 +1,6 @@
 class slideDeck extends HTMLElement {
   // template
-  #appendShadowTemplate = () => {
+  static #appendShadowTemplate = (node) => {
     const template = document.createElement("template");
     template.innerHTML = `
       <slot></slot>
@@ -44,7 +44,7 @@ class slideDeck extends HTMLElement {
         </dialog>
       </slot>
     `;
-    const shadowRoot = this.attachShadow({ mode: "open" });
+    const shadowRoot = node.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
   }
 
@@ -148,7 +148,7 @@ class slideDeck extends HTMLElement {
     super();
 
     // shadow dom and ID
-    this.#appendShadowTemplate();
+    slideDeck.#appendShadowTemplate(this);
     this.#setDeckID();
 
     // relevant nodes
