@@ -113,8 +113,8 @@ class slideDeck extends HTMLElement {
   // dynamic
   #store = {};
   slides;
-  slideNotes;
-  slideCanvas;
+  #slideNotes;
+  #slideCanvas;
   slideCount;
   activeSlide;
   #controlPanel;
@@ -212,7 +212,7 @@ class slideDeck extends HTMLElement {
 
     return ID;
   };
-
+x
   #setDeckID = () => {
     this.id = this.id || this.#newDeckId();
 
@@ -249,8 +249,8 @@ class slideDeck extends HTMLElement {
       }
     });
 
-    this.slideNotes = this.querySelectorAll(':scope [slide-note]');
-    this.slideCanvas = this.querySelectorAll(':scope [slide-canvas]');
+    this.#slideNotes = this.querySelectorAll(':scope [slide-note]');
+    this.#slideCanvas = this.querySelectorAll(':scope [slide-canvas]');
   };
 
   #defaultAttrs = () => {
