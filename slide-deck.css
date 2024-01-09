@@ -3,17 +3,51 @@ slide-deck {
   container: slide-deck / inline-size;
   display: grid;
 
-  &[slide-view=grid] {
+  &[slide-view=grid],
+  &[slide-view=script] {
     --slide-ratio: 16/9;
-    --target-outline: medium dotted;
     --target-margin: var(--gap);
+    --target-outline: medium dotted;
+    --target-outline-offset: calc(var(--gap) * 0.5);
     gap: var(--gap);
-    grid-template-columns: repeat(auto-fill, minmax(min(50ch, 100%), 1fr));
     padding: var(--gap);
   }
 
-  &[slide-view=list] {
+  &[slide-view=grid] {
+    --slide-note-margin-block: var(--gap);
+    grid-template-columns: repeat(auto-fill, minmax(min(50ch, 100%), 1fr));
+  }
+
+  &[slide-view=solo] {
     --slide-height: 100svh;
+  }
+
+  &[slide-view=script] {
+    display: grid;
+    grid-template-columns: 65ch 1fr;
+
+    [slide-item='container'] {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+    }
+
+    [slide-canvas] {
+      grid-column: 1;
+      scale: var(--scaled-slide, 0.80);
+    }
+
+    [slide-note] {
+      font-size: var(--note-font-size, 120%);
+      grid-column: 2;
+      max-width: 65ch;
+      padding-inline: var(--gap);
+    }
+
+    [slide-item]:target {
+      --note-font-size: 160%;
+      --scaled-slide: 1;
+    }
   }
 
   &[blank-slide]::after {
@@ -27,19 +61,27 @@ slide-deck {
     --blank-color: white;
   }
 
-  [id^=slide_] {
+  [slide-item] {
+    scroll-margin-block: var(--target-margin);
+  }
+
+  [aria-current='true'][slide-canvas],
+  [aria-current='true'] [slide-canvas] {
+    outline: var(--target-outline);
+    outline-offset: var(--target-outline-offset);
+  }
+
+  [slide-canvas] {
     aspect-ratio: var(--slide-ratio);
     border: thin solid;
     box-sizing: border-box;
     container: slide-item / inline-size;
     min-height: var(--slide-height);
     padding: var(--gap);
-    scroll-margin-block: var(--target-margin);
+  }
 
-    &:target {
-      outline: var(--target-outline);
-      outline-offset: calc(var(--gap) * 0.5);
-    }
+  [slide-note] {
+    margin-block: var(--slide-note-margin-block);
   }
 
   &::part(control-panel) {
@@ -67,7 +109,7 @@ slide-deck {
   }
 
   [aria-pressed=true],
-  &::part(button pressed) {
+  &::part(pressed) {
     border-color: currentColor;
   }
 }
