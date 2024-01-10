@@ -9,7 +9,7 @@ slide-deck {
     --target-margin: var(--gap);
     --target-outline: medium dotted;
     --target-outline-offset: calc(var(--gap) * 0.5);
-    gap: var(--gap);
+    gap: var(--row-gap, var(--gap)) var(--column-gap, var(--gap));
     padding: var(--gap);
   }
 
@@ -23,10 +23,16 @@ slide-deck {
   }
 
   &[slide-view=script] {
+    --column-gap: calc(1.25em + 2vw);
+    --row-gap: 5em;
     display: grid;
-    grid-template-columns: 65ch 1fr;
+
+    @media (width >= 60em) {
+      grid-template-columns: minmax(30vw, auto) minmax(65vw, 1fr);
+    }
 
     [slide-item='container'] {
+      align-items: center;
       display: grid;
       grid-column: 1 / -1;
       grid-template-columns: subgrid;
@@ -40,7 +46,7 @@ slide-deck {
     [slide-note] {
       font-size: var(--note-font-size, 120%);
       grid-column: 2;
-      max-width: 65ch;
+      max-width: 75ch;
       padding-inline: var(--gap);
     }
 
