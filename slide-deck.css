@@ -64,17 +64,6 @@ slide-deck {
     }
   }
 
-  &[blank-slide]::after {
-    background-color: var(--blank-color, black);
-    content: '';
-    inset: 0;
-    position: absolute;
-  }
-
-  &[blank-slide=white] {
-    --blank-color: white;
-  }
-
   [slide-item] {
     scroll-margin-block: var(--target-margin);
   }
