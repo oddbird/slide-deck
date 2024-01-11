@@ -481,6 +481,12 @@ class slideDeck extends HTMLElement {
   #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
 
   #keyEventActions = (event) => {
+    // exit from blank slide
+    if (this.hasAttribute('blank-slide')) {
+      event.preventDefault();
+      this.removeAttribute('blank-slide');
+      return;
+    }
 
     // always available
     if (this.#cmdOrCtrl(event)) {
