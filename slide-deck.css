@@ -19,7 +19,15 @@ slide-deck {
   }
 
   &[slide-view=solo] {
-    --slide-height: 100svh;
+    grid-auto-rows: 100svh;
+
+    [slide-item] {
+      --slide-height: 100svh;
+    }
+
+    [slide-note] {
+      display: none;
+    }
   }
 
   &[slide-view=script] {
