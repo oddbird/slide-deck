@@ -8,7 +8,9 @@ class slideDeck extends HTMLElement {
         <dialog part="control-panel">
           <div part="panel-header">
             <strong>Slide-Deck Controls</strong>
-            <form method="dialog"><button>close</button></form>
+            <form method="dialog">
+              <button part="button close-controls">close</button>
+            </form>
           </div>
           <div part="controls">
             <button part="button" slide-event='toggleControl'>
@@ -43,9 +45,60 @@ class slideDeck extends HTMLElement {
           </div>
         </dialog>
       </slot>
+      <slot name="blank-slide">
+        <dialog part="blank-slide">
+          <form method="dialog">
+            <button part="close-blank-slide">x</button>
+          </form>
+        </dialog>
+      </slot>
     `;
     const shadowRoot = node.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
+  }
+
+  // css
+  static adoptShadowStyles = (node) => {
+    const shadowStyle = new CSSStyleSheet();
+    shadowStyle.replaceSync(`
+      [part=button] {
+        font: inherit;
+        display: inline-block;
+      }
+
+      [part=blank-slide][open] {
+        background: var(--blank-slide-bg, canvas);
+        block-size: 100%;
+        border: 0;
+        color: var(--blank-slide-bg, canvas);
+        color-scheme: dark;
+        display: grid;
+        inline-size: 100%;
+        max-block-size: unset;
+        max-inline-size: unset;
+        padding: 0;
+
+        form { display: grid; }
+      }
+
+      [part=close-blank-slide] {
+        background: transparent;
+        border: 0;
+        color: inherit;
+        opacity: 0.2;
+
+        &:focus-visible {
+          outline: thin dotted gray;
+          color: gray;
+        }
+      }
+
+      :host([blank-slide=white]) {
+        color-scheme: light;
+        --blank-slide-bg: white;
+      }
+    `);
+    node.shadowRoot.adoptedStyleSheets = [shadowStyle];
   }
 
   // static
@@ -113,6 +166,7 @@ class slideDeck extends HTMLElement {
   slideCount;
   activeSlide;
   #controlPanel;
+  #blankSlide;
   #eventButtons;
   #viewButtons;
   #body;
@@ -143,12 +197,15 @@ class slideDeck extends HTMLElement {
 
     // shadow dom and ID
     slideDeck.#appendShadowTemplate(this);
+    slideDeck.adoptShadowStyles(this);
     this.#setDeckID();
 
     // relevant nodes
     this.#body = document.querySelector('body');
     this.#controlPanel = this.querySelector(`[slot="control-panel"]`) ??
       this.shadowRoot.querySelector(`[part="control-panel"]`);
+    this.#blankSlide = this.querySelector(`[slot="blank-slide"]`) ??
+      this.shadowRoot.querySelector(`[part="blank-slide"]`);
 
     // initial setup
     this.#defaultAttrs();
@@ -159,15 +216,22 @@ class slideDeck extends HTMLElement {
     this.#setupEventButtons();
     this.#setupViewButtons();
 
-    // event listeners
+    // shadow DOM event listeners
     this.shadowRoot.addEventListener('keydown', (event) => {
       event.stopPropagation();
 
-      if ((event.key === 'k' && this.#cmdOrCtrl(event)) || event.key === 'Escape') {
+      if (this.hasAttribute('blank-slide')) {
+        event.preventDefault();
+        this.blankSlideEvent();
+      } else if ((event.key === 'k' && this.#cmdOrCtrl(event)) || event.key === 'Escape') {
         event.preventDefault();
         this.#controlPanel.close();
       }
     });
+
+    this.#blankSlide.addEventListener('close', (event) => {
+      this.removeAttribute('blank-slide');
+    })
 
     // custom events
     this.addEventListener('toggleControl', (e) => this.toggleAttribute('key-control'));
@@ -375,9 +439,11 @@ class slideDeck extends HTMLElement {
   }
 
   blankSlideEvent = (color) => {
-    if (this.hasAttribute('blank-slide')) {
+    if (this.#blankSlide.open) {
+      this.#blankSlide.close();
       this.removeAttribute('blank-slide');
     } else {
+      this.#blankSlide.showModal();
       this.setAttribute('blank-slide', color || 'black');
     }
   }
