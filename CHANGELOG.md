@@ -4,8 +4,16 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.1.2 - unreleased
+## v0.1.2 - 2024-01-11
 
+- 💥 BREAKING: Disabled the full-screen keyboard shortcut,
+  until we have a chance to address the various
+  fullscreen browser issues
+- 💥 BREAKING: Removed the shadow DOM content wrapper,
+  and all shadow DOM styles
+- 🚀 NEW / 💥 BREAKING: Renamed and added control-panel parts,
+  to allow for more customization of the default panel
+  including pressed buttons with `:part(button pressed)`
 - 🚀 NEW: Set `aria-current='true'` on active slide
 - 🚀 NEW: Add support for slide parts – `slide-canvas` & `slide-note`
 - 🚀 NEW: Each slide is labeled with either
@@ -13,11 +21,6 @@ until we achieve a stable v1.0 release
   or `slide-item='canvas' slide-canvas` (if there are no nested parts)
 - 🚀 NEW: The slide-deck has a `--slide-count` property,
   and each slide has a `--slide-index`
-- 💥 BREAKING: Removed the shadow DOM content wrapper,
-  and all shadow DOM styles
-- 🚀 NEW / 💥 BREAKING: Renamed and added control-panel parts,
-  to allow for more customization of the default panel
-  including pressed buttons with `:part(button pressed)`
 - 🚀 NEW: Default styles are in `slide-deck.css`
   and can be applied from the light DOM
 - 🚀 NEW: The entire control panel can be replaced

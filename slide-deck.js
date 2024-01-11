@@ -503,12 +503,6 @@ x
           event.preventDefault();
           this.#controlPanel.showModal();
           break;
-        case 'f':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.fullScreenEvent();
-          }
-          break;
         case 'Enter':
           if (event.shiftKey) {
             event.preventDefault();

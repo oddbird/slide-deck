@@ -12,19 +12,40 @@
   <body>
     <slide-deck id="my-slides" key-control>
       <header>
-        <h1>Slide-Deck Web Component</h1>
-        <p>
-          <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
-        </p>
+        <div slide-canvas>
+          <h1>Slide-Deck Web Component</h1>
+          <p>
+            <a href="https://github.com/oddbird/slide-deck/">
+              github.com/oddbird/slide-deck/
+            </a>
+          </p>
+          <p>
+            View as…
+            <button set-view="grid">grid</button>
+            <button set-view="script">script</button>
+            <button set-view="solo">full-page</button>
+          </p>
+        </div>
+        <div slide-note>
+          We support speaker notes!
+        </div>
       </header>
-      <div><h2>No Dependencies</h2></div>
+      <div>
+        <h2>No Dependencies</h2>
+        <p>This is a stand-alone web compontent</p>
+      </div>
       <div>
         <div slide-canvas>
           <h2>Progressive Enhancement</h2>
+          <p>Fallback to semantic HTML</p>
         </div>
         <div slide-note>
           <p>
-            Some slide notes are very short. Little reminders.
+            JavaScript is needed
+            for using keyboard shortcuts
+            or opening the control panel.
+            The markup and styles
+            are all there on first-load.
           </p>
         </div>
       </div>
@@ -33,117 +54,34 @@
           <h2>Just HTML</h2>
         </div>
         <div slide-note>
-          <h2>
+          <h3>
             Slide notes are also HTML
-          </h2>
+          </h3>
           <p>
-            In script view the active slide-item will have a larger canvas size
+            In <button set-view='script'>script view</button>
+            the active slide-item will have a larger canvas size
             and the font-size of an active slides speaker notes is increased
             for easier readability.
           </p>
 
-          <h3>
-            This is a heading level 3
-          </h3>
+          <h4>
+            This is a heading level 4
+          </h4>
 
           <p>
-            This paragraph exists to test a <strong>variety of content</strong> 
-            within <em>slide-notes</em>. While some slides may not have any 
-            notes at all, others may have extremely verbose notes and may 
+            This paragraph exists to test a <strong>variety of content</strong>
+            within <em>slide-notes</em>. While some slides may not have any
+            notes at all, others may have extremely verbose notes and may
             contain many details.
           </p>
 
           <blockquote>
             <p>
-              Blockquote example within the slide-notes to test a few different 
+              Blockquote example within the slide-notes to test a few different
               content types.
             </p>
           </blockquote>
         </div>
-      </div>
-      <div><h2>Keyboard Shortcuts</h2></div>
-      <div>
-        <h3>Always available:</h3>
-        <ul>
-          <li><strong>command-k</strong>: Toggle control panel</li>
-          <li><strong>command-shift-enter</strong>: Start presentation (from first slide)</li>
-          <li><strong>command-enter</strong>: Resume presentation (from active slide)</li>
-          <li><strong>command-shift-f</strong>: Toggle full-screen mode</li>
-          <li>
-            <strong>command-.</strong>:
-            End presentation
-          </li>
-        </ul>
-      </div>
-      <div>
-        <h3>Active Presentation:</h3>
-        <ul>
-          <li>
-            <strong>N</strong>
-            / <strong>right-arrow</strong>
-            / <strong>down-arrow</strong>
-            / <strong>page-down</strong>:
-            Next slide
-          </li>
-          <li>
-            <strong>P</strong>
-            / <strong>left-arrow</strong>
-            / <strong>up-arrow</strong>
-            / <strong>page-up</strong>:
-            Previous slide
-          </li>
-          <li>
-            <strong>home</strong>:
-            First slide
-          </li>
-          <li>
-            <strong>end</strong>:
-            Last slide
-          </li>
-          <li>
-            <strong>W</strong>
-            / <strong>,</strong>:
-            Toggle white screen
-          </li>
-          <li>
-            <strong>B</strong>
-            / <strong>.</strong>:
-            Toggle black screen
-          </li>
-          <li>
-            <strong>escape</strong>:
-            Blur focused element, close control panel, or end presentation
-          </li>
-        </ul>
-      </div>
-      <div><h2>Works with Presentation Remotes</h2></div>
-      <div><h2>Add Your Own Controls</h2></div>
-      <div>
-        <h2><code>&lt;button slide-event&gt;previous&lt;button&gt;</code></h2>
-        <div>
-          <button slide-event>previous</button>
-          <button slide-event>next</button>
-          <button slide-event="start">restart</button>
-        </div>
-      </div>
-      <div>
-        <h2><code>&lt;button set-view&gt;solo&lt;button&gt;</code></h2>
-        <div>
-          <button set-view>solo</button>
-          <button set-view>grid</button>
-          <button set-view>script</button>
-        </div>
-      </div>
-      <div>
-        <h2>Custom Control Panel</h2>
-        <a href="./custom-panel.html">Example</a>
-      </div>
-      <div><h2>Speaker View</h2></div>
-      <div>
-        <h2>Open Source</h2>
-        <p>
-          <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
-        </p>
       </div>
 
       <div>
@@ -160,13 +98,15 @@
         </div>
         <div slide-note>
           <p>
-            Within a slide element,
-            we can provide both a 'canvas' and a 'note'!
-            For styling purposes:
+            To add speaker notes,
+            a slide should contain
+            two children: using the
+            <code>slide-note</code> and <code>slide-canvas</code>
+            attributes.
           </p>
           <ul>
             <li>
-              A slide with internal parts
+              A slide with these internal parts
               will be labeled
               as a <code>slide-item="container"</code>
             </li>
@@ -178,10 +118,170 @@
           </ul>
         </div>
       </div>
+
+      <div>
+        <h2>Keep it simple</h2>
+        <p>
+          If you don't need speaker notes,
+          don't worry about it.
+          Every child of <code>slide-deck</code>
+          is a slide without any extra markup.
+        </p>
+      </div>
+
+      <div><h2>Keyboard Shortcuts</h2></div>
+      <div>
+        <div slide-canvas>
+          <h3>Always available:</h3>
+          <ul>
+            <li><strong>command-k</strong>: Toggle control panel</li>
+            <li><strong>command-shift-enter</strong>: Start presentation (from first slide)</li>
+            <li><strong>command-enter</strong>: Resume presentation (from active slide)</li>
+            <li>
+              <strong>command-.</strong>:
+              End presentation
+            </li>
+          </ul>
+        </div>
+        <div slide-note>
+          <p>
+            Starting a presentation
+            takes you into full-page slide view,
+            with keyboard controls on,
+            and following active-slide changes in local-storage
+            (in case you are using multiple tabs
+            for differnt views).
+          </p>
+          <p>
+            Ending a presentation
+            returns you to the grid layout,
+            turning off key-control and active-follow.
+          </p>
+        </div>
+      </div>
+      <div>
+        <div slide-canvas>
+          <h3>Active Presentation:</h3>
+          <ul>
+            <li>
+              <strong>N</strong>
+              / <strong>right-arrow</strong>
+              / <strong>down-arrow</strong>
+              / <strong>page-down</strong>:
+              Next slide
+            </li>
+            <li>
+              <strong>P</strong>
+              / <strong>left-arrow</strong>
+              / <strong>up-arrow</strong>
+              / <strong>page-up</strong>:
+              Previous slide
+            </li>
+            <li>
+              <strong>home</strong>:
+              First slide
+            </li>
+            <li>
+              <strong>end</strong>:
+              Last slide
+            </li>
+            <li>
+              <strong>W</strong>
+              / <strong>,</strong>:
+              Toggle white screen
+            </li>
+            <li>
+              <strong>B</strong>
+              / <strong>.</strong>:
+              Toggle black screen
+            </li>
+            <li>
+              <strong>escape</strong>:
+              Blur focused element, close control panel, or end presentation
+            </li>
+          </ul>
+        </div>
+        <div slide-note>
+          <p>
+            When the <code>key-control</code>
+            feature is turned on,
+            these extra shortcuts are available.
+            To turn them on by default,
+            add the <code>key-control</code> attribute
+            to your <code>slide-deck</code>.
+          </p>
+        </div>
+      </div>
+      <div>
+        <h2>Works with Presentation Remotes</h2>
+        <p>
+          (at least the ones we've tested -
+          they just send keyboard shortcuts)
+        </p>
+      </div>
+      <div>
+        <h2>Add Your Own Controls</h2>
+        <p>
+          You can even provide your own
+          <a href="./custom-panel.html">custom control panel</a>,
+          by providing a <code>dialog</code> element
+          with <code>slot="control-panel"</code>.
+        </p>
+      </div>
+      <div>
+        <div slide-canvas>
+          <h2><code>&lt;button slide-event&gt;previous&lt;button&gt;</code></h2>
+          <div>
+            <button slide-event>previous</button>
+            <button slide-event>next</button>
+            <button slide-event="start">restart</button>
+          </div>
+        </div>
+        <div slide-note>
+          Buttons with the <code>slide-event</code> attribute
+          will send custom events to the <code>slide-deck</code>
+          when activated.
+          The event can be specified in the attribute
+          (<code>slide-event="next"</code>)
+          or it will be inferred from the inner text of the button.
+        </div>
+      </div>
+      <div>
+        <div slide-canvas>
+          <h2><code>&lt;button set-view&gt;solo&lt;button&gt;</code></h2>
+          <div>
+            <button set-view>solo</button>
+            <button set-view>grid</button>
+            <button set-view>script</button>
+          </div>
+        </div>
+        <div slide-note>
+          Buttons with the <code>set-view</code> attribute
+          will set the <code>slide-view</code> attribute
+          on the <code>slide-deck</code> when activated.
+          The view can be specified in the attribute
+          (<code>set-view="grid"</code>)
+          or it will be inferred from the inner text of the button.
+        </div>
+      </div>
+      <div>
+        <h2>Open Source</h2>
+        <p>
+          <a href="https://github.com/oddbird/slide-deck/">github.com/oddbird/slide-deck/</a>
+        </p>
+      </div>
       <div><h2>To Do…</h2></div>
       <div><h3>… Slide Templates</h3></div>
       <div><h3>… CSS Themes</h3></div>
-      <div><h3>… More Better Good Stuff</h3></div>
+      <div><h3>… Fullscreen mode</h3></div>
+      <div>
+        <h3>… [Your Request Here]</h3>
+        <p>
+          What features would you like to see?
+          Let us know in the
+          <a href="https://github.com/oddbird/slide-deck/issues/">GitHub Issues</a>
+        </p>
+      </div>
     </slide-deck>
   </body>
 </html>
