@@ -57,10 +57,10 @@ slide-deck {
   }
 
   &[blank-slide]::after {
-    content: '';
     background-color: var(--blank-color, black);
-    position: absolute;
+    content: '';
     inset: 0;
+    position: absolute;
   }
 
   &[blank-slide=white] {
@@ -109,9 +109,9 @@ slide-deck {
 
   button,
   &::part(button) {
+    border: medium solid transparent;
     font: inherit;
     padding-inline: var(--gap);
-    border: medium solid transparent;
   }
 
   [aria-pressed=true],
