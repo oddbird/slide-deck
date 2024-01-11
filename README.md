@@ -110,22 +110,25 @@ Make sure you include the `<script>` in your project (choose one of these):
 
 ```html
 <!-- Host yourself -->
+<link rel="stylesheet" href="slide-deck.css">
 <script type="module" src="slide-deck.js"></script>
 ```
 
 ```html
 <!-- 3rd party CDN, not recommended for production use -->
+<link rel="stylesheet" href="https://www.unpkg.com/@oddbird/slide-deck/slide-deck.css">
 <script
   type="module"
-  src="https://www.unpkg.com/@oddbird/slide-deck@0.1.0/slide-deck.js"
+  src="https://www.unpkg.com/@oddbird/slide-deck/slide-deck.js"
 ></script>
 ```
 
 ```html
 <!-- 3rd party CDN, not recommended for production use -->
+<link rel="stylesheet" href="https://esm.sh/@oddbird/slide-deck/slide-deck.css">
 <script
   type="module"
-  src="https://esm.sh/@oddbird/slide-deck@0.1.0"
+  src="https://esm.sh/@oddbird/slide-deck"
 ></script>
 ```
 
