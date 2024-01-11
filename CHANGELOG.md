@@ -28,6 +28,7 @@ until we achieve a stable v1.0 release
   we target the stored active slide (or the first slide)
 - 🐞 FIXED: When restoring the active slide from memory,
   we go to the first slide if there's no stored state
+- 🐞 FIXED: Use any key to exit a blank-slide mode
 
 ## v0.1.1 - 2023-12-26
 
