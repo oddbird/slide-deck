@@ -169,7 +169,7 @@ class slideDeck extends HTMLElement {
     this.shadowRoot.addEventListener('keydown', (event) => {
       event.stopPropagation();
 
-      if ((event.key === 'k' && event.metaKey) || event.key === 'Escape') {
+      if ((event.key === 'k' && this.cmdOrCtrl(event)) || event.key === 'Escape') {
         event.preventDefault();
         this.#controlPanel.close();
       }
@@ -491,9 +491,13 @@ x
     this.goTo(this.#slideFromStore());
   }
 
+  // Detect Ctrl / Cmd modifiers in a platform-agnostic way
+  #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
+
   #keyEventActions = (event) => {
+
     // always available
-    if (event.metaKey) {
+    if (this.#cmdOrCtrl(event)) {
       switch (event.key) {
         case 'k':
           event.preventDefault();

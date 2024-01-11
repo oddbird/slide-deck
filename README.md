@@ -81,6 +81,8 @@ Always available:
 - `command-.`: End presentation
 - `command-shift-f`: Toggle full-screen mode
 
+*Windows and Linux users can use Ctrl instead of Command.*
+
 When presenting (key-control is active):
 
 - `N`/`rightArrow`/`downArrow`/`pageDown`: Next slide
