@@ -21,8 +21,8 @@ slide-deck {
   &[slide-view=solo] {
     grid-auto-rows: 100svh;
 
-    [slide-item] {
-      --slide-height: 100svh;
+    [slide-item='container'] {
+      display: grid;
     }
 
     [slide-note] {
@@ -90,7 +90,6 @@ slide-deck {
     border: thin solid;
     box-sizing: border-box;
     container: slide-item / inline-size;
-    min-height: var(--slide-height);
     padding: var(--gap);
   }
 
