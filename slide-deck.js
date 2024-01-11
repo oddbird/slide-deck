@@ -93,9 +93,8 @@ class slideDeck extends HTMLElement {
         }
       }
 
-      :host([blank-slide=white]) {
+      :host([blank-slide=white]) [part=blank-slide][open] {
         color-scheme: light;
-        --blank-slide-bg: white;
       }
     `);
     node.shadowRoot.adoptedStyleSheets = [shadowStyle];
