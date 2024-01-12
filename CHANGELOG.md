@@ -9,12 +9,18 @@ until we achieve a stable v1.0 release
 - 💥 BREAKING: Disabled the full-screen keyboard shortcut,
   until we have a chance to address the various
   fullscreen browser issues
+- 💥 BREAKING: Removed the 'end presentation' event
+  and keyboard shortcuts, which were more confusing than useful
 - 💥 BREAKING: Removed the shadow DOM content wrapper,
   and all shadow DOM styles
+- 💥 BREAKING: The `reset` targets the first slide
+  rather than the slide-deck container
 - 🚀 NEW / 💥 BREAKING: Renamed and added control-panel parts,
   to allow for more customization of the default panel
   including pressed buttons with `:part(button pressed)`
 - 🚀 NEW: Set `aria-current='true'` on active slide
+- 🚀 NEW: View settings are maintained across page refresh
+  using `sessionStorage`
 - 🚀 NEW: Add support for slide parts – `slide-canvas` & `slide-note`
 - 🚀 NEW: Each slide is labeled with either
   `slide-item='container'` (if it has nested parts)
