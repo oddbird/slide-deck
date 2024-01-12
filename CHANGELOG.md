@@ -26,9 +26,11 @@ until we achieve a stable v1.0 release
 - 🚀 NEW: The entire control panel can be replaced
   from the light DOM using `slot=control-panel`
   on a slotted `dialog` element
-- 🐞 FIXED: Slotted controls are no longer treated as slides
 - 🚀 NEW: When `key-control` is activated (including on-load),
   we target the stored active slide (or the first slide)
+- 🚀 NEW: Support for keyboard shortcuts on Windows/Linux
+  using `control` instead of `command`
+- 🐞 FIXED: Slotted controls are no longer treated as slides
 - 🐞 FIXED: When restoring the active slide from memory,
   we go to the first slide if there's no stored state
 
