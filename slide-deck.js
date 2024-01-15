@@ -48,7 +48,9 @@ class slideDeck extends HTMLElement {
       <slot name="blank-slide">
         <dialog part="blank-slide">
           <form method="dialog">
-            <button part="close-blank-slide">x</button>
+            <button part="close-blank-slide">
+              <span>x<span>
+            </button>
           </form>
         </dialog>
       </slot>
@@ -58,43 +60,37 @@ class slideDeck extends HTMLElement {
   }
 
   // css
-  static adoptShadowStyles = (node) => {
+  static #adoptShadowStyles = (node) => {
     const shadowStyle = new CSSStyleSheet();
     shadowStyle.replaceSync(`
-      [part=button] {
-        font: inherit;
-        display: inline-block;
-      }
-
-      [part=blank-slide][open] {
-        background: var(--blank-slide-bg, canvas);
+      [part=blank-slide],
+      ::slotted([slot=blank-slide]) {
         block-size: 100%;
-        border: 0;
-        color: var(--blank-slide-bg, canvas);
-        color-scheme: dark;
-        display: grid;
         inline-size: 100%;
         max-block-size: unset;
         max-inline-size: unset;
+      }
+
+      [part=blank-slide] {
+        border: 0;
+        color-scheme: var(--sd-blank-slide-scheme, dark);
         padding: 0;
 
+        &[open] { display: grid; }
         form { display: grid; }
+      }
+
+      :host([blank-slide=white]) {
+        --sd-blank-slide-scheme: light;
       }
 
       [part=close-blank-slide] {
         background: transparent;
         border: 0;
         color: inherit;
-        opacity: 0.2;
-
-        &:focus-visible {
-          outline: thin dotted gray;
-          color: gray;
-        }
-      }
-
-      :host([blank-slide=white]) [part=blank-slide][open] {
-        color-scheme: light;
+        display: grid;
+        font: inherit;
+        place-items: start end;
       }
     `);
     node.shadowRoot.adoptedStyleSheets = [shadowStyle];
@@ -202,7 +198,7 @@ class slideDeck extends HTMLElement {
 
     // shadow dom and ID
     slideDeck.#appendShadowTemplate(this);
-    slideDeck.adoptShadowStyles(this);
+    slideDeck.#adoptShadowStyles(this);
     this.#setDeckID();
 
     // relevant nodes
