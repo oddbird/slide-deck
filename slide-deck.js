@@ -66,14 +66,14 @@ class slideDeck extends HTMLElement {
       [part=blank-slide],
       ::slotted([slot=blank-slide]) {
         block-size: 100%;
+        border: 0;
+        color-scheme: var(--sd-blank-slide-scheme, dark);
         inline-size: 100%;
         max-block-size: unset;
         max-inline-size: unset;
       }
 
       [part=blank-slide] {
-        border: 0;
-        color-scheme: var(--sd-blank-slide-scheme, dark);
         padding: 0;
 
         &[open] { display: grid; }
