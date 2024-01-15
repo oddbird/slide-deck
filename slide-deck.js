@@ -22,7 +22,7 @@ class slideDeck extends HTMLElement {
               start
             </button>
             <button part="button event" slide-event>
-              end
+              reset
             </button>
             <button part="button event" slide-event="joinWithNotes">
               speaker view
@@ -105,16 +105,11 @@ class slideDeck extends HTMLElement {
     '.': 'blackOut',
     'W': 'whiteOut',
     ',': 'whiteOut',
-
-    // end
-    '-': 'endPresentation'
   }
 
   // dynamic
   #store = {};
   slides;
-  #slideNotes;
-  #slideCanvas;
   slideCount;
   activeSlide;
   #controlPanel;
@@ -134,8 +129,7 @@ class slideDeck extends HTMLElement {
         this.#updateEventButtons();
         break;
       case 'slide-view':
-        this.#updateViewButtons();
-        this.scrollToActive();
+        this.#onViewChange();
         break;
       default:
         break;
@@ -169,7 +163,7 @@ class slideDeck extends HTMLElement {
     this.shadowRoot.addEventListener('keydown', (event) => {
       event.stopPropagation();
 
-      if ((event.key === 'k' && this.cmdOrCtrl(event)) || event.key === 'Escape') {
+      if ((event.key === 'k' && this.#cmdOrCtrl(event)) || event.key === 'Escape') {
         event.preventDefault();
         this.#controlPanel.close();
       }
@@ -184,7 +178,6 @@ class slideDeck extends HTMLElement {
     this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
     this.addEventListener('start', (e) => this.startEvent());
     this.addEventListener('resume', (e) => this.resumeEvent());
-    this.addEventListener('end', (e) => this.endEvent());
     this.addEventListener('reset', (e) => this.resetEvent());
     this.addEventListener('blankSlide', (e) => this.blankSlideEvent());
 
@@ -212,7 +205,7 @@ class slideDeck extends HTMLElement {
 
     return ID;
   };
-x
+
   #setDeckID = () => {
     this.id = this.id || this.#newDeckId();
 
@@ -248,15 +241,15 @@ x
         }
       }
     });
-
-    this.#slideNotes = this.querySelectorAll(':scope [slide-note]');
-    this.#slideCanvas = this.querySelectorAll(':scope [slide-canvas]');
   };
 
   #defaultAttrs = () => {
     // view required
-    if (!this.hasAttribute('slide-view')) {
-      this.setAttribute('slide-view', 'grid');
+    if (!this.slideView) {
+      this.setAttribute(
+        'slide-view',
+        sessionStorage.getItem(this.#store.view) || 'grid'
+      );
     }
 
     // fullscreen must be set by user interaction
@@ -310,6 +303,13 @@ x
     this.#viewButtons.forEach((btn) => {
       this.#setToggleState(btn, 'set-view', this.slideView);
     });
+  }
+
+  // attribute changes
+  #onViewChange = () => {
+    this.#updateViewButtons();
+    this.scrollToActive();
+    sessionStorage.setItem(this.#store.view, this.slideView);
   }
 
   // event buttons
@@ -370,16 +370,8 @@ x
     this.setAttribute('follow-active', '');
   }
 
-  endEvent = () => {
-    this.setAttribute('slide-view', 'grid');
-    this.removeAttribute('key-control');
-    this.removeAttribute('follow-active');
-    this.resetEvent();
-  }
-
   resetEvent = () => {
-    window.location.hash = this.id;
-    this.resetActive();
+    this.goTo(1);
   }
 
   blankSlideEvent = (color) => {
@@ -476,12 +468,6 @@ x
     }
   }
 
-  resetActive = () => {
-    this.activeSlide = null;
-    window.location.hash = this.id;
-    localStorage.removeItem(this.#store.slide);
-  };
-
   move = (by) => {
     const to = (this.#getActive() || 0) + by;
     this.goTo(to);
@@ -512,10 +498,7 @@ x
             this.resumeEvent();
           }
           break;
-        case '.':
-          event.preventDefault();
-          this.endEvent();
-          break;
+
         default:
           break;
       }
@@ -531,9 +514,6 @@ x
       if (event.key === 'Escape') {
         if (event.target !== this.#body) {
           event.target.blur();
-        } else {
-          event.preventDefault();
-          this.endEvent();
         }
         return;
       }
@@ -562,10 +542,6 @@ x
         case 'whiteOut':
           event.preventDefault();
           this.blankSlideEvent('white');
-          break;
-        case 'endPresentation':
-          event.preventDefault();
-          this.endEvent();
           break;
         default:
           break;
