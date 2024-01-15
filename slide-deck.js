@@ -8,7 +8,9 @@ class slideDeck extends HTMLElement {
         <dialog part="control-panel">
           <div part="panel-header">
             <strong>Slide-Deck Controls</strong>
-            <form method="dialog"><button>close</button></form>
+            <form method="dialog">
+              <button part="button close-controls">close</button>
+            </form>
           </div>
           <div part="controls">
             <button part="button" slide-event='toggleControl'>
@@ -43,9 +45,55 @@ class slideDeck extends HTMLElement {
           </div>
         </dialog>
       </slot>
+      <slot name="blank-slide">
+        <dialog part="blank-slide">
+          <form method="dialog">
+            <button part="close-blank-slide">
+              <span aria-label="close">x<span>
+            </button>
+          </form>
+        </dialog>
+      </slot>
     `;
     const shadowRoot = node.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
+  }
+
+  // css
+  static #adoptShadowStyles = (node) => {
+    const shadowStyle = new CSSStyleSheet();
+    shadowStyle.replaceSync(`
+      [part=blank-slide],
+      ::slotted([slot=blank-slide]) {
+        block-size: 100%;
+        border: 0;
+        color-scheme: var(--sd-blank-slide-scheme, dark);
+        inline-size: 100%;
+        max-block-size: unset;
+        max-inline-size: unset;
+      }
+
+      [part=blank-slide] {
+        padding: 0;
+
+        &[open] { display: grid; }
+        form { display: grid; }
+      }
+
+      :host([blank-slide=white]) {
+        --sd-blank-slide-scheme: light;
+      }
+
+      [part=close-blank-slide] {
+        background: transparent;
+        border: 0;
+        color: inherit;
+        display: grid;
+        font: inherit;
+        place-items: start end;
+      }
+    `);
+    node.shadowRoot.adoptedStyleSheets = [shadowStyle];
   }
 
   // static
@@ -118,6 +166,7 @@ class slideDeck extends HTMLElement {
   slideCount;
   activeSlide;
   #controlPanel;
+  #blankSlide;
   #eventButtons;
   #viewButtons;
   #body;
@@ -149,12 +198,15 @@ class slideDeck extends HTMLElement {
 
     // shadow dom and ID
     slideDeck.#appendShadowTemplate(this);
+    slideDeck.#adoptShadowStyles(this);
     this.#setDeckID();
 
     // relevant nodes
     this.#body = document.querySelector('body');
     this.#controlPanel = this.querySelector(`[slot="control-panel"]`) ??
       this.shadowRoot.querySelector(`[part="control-panel"]`);
+    this.#blankSlide = this.querySelector(`[slot="blank-slide"]`) ??
+      this.shadowRoot.querySelector(`[part="blank-slide"]`);
 
     // initial setup
     this.#defaultAttrs();
@@ -165,15 +217,22 @@ class slideDeck extends HTMLElement {
     this.#setupEventButtons();
     this.#setupViewButtons();
 
-    // event listeners
+    // shadow DOM event listeners
     this.shadowRoot.addEventListener('keydown', (event) => {
       event.stopPropagation();
 
-      if ((event.key === 'k' && this.cmdOrCtrl(event)) || event.key === 'Escape') {
+      if (this.hasAttribute('blank-slide')) {
+        event.preventDefault();
+        this.blankSlideEvent();
+      } else if ((event.key === 'k' && this.cmdOrCtrl(event)) || event.key === 'Escape') {
         event.preventDefault();
         this.#controlPanel.close();
       }
     });
+
+    this.#blankSlide.addEventListener('close', (event) => {
+      this.removeAttribute('blank-slide');
+    })
 
     // custom events
     this.addEventListener('toggleControl', (e) => this.toggleAttribute('key-control'));
@@ -383,9 +442,11 @@ x
   }
 
   blankSlideEvent = (color) => {
-    if (this.hasAttribute('blank-slide')) {
+    if (this.#blankSlide.open) {
+      this.#blankSlide.close();
       this.removeAttribute('blank-slide');
     } else {
+      this.#blankSlide.showModal();
       this.setAttribute('blank-slide', color || 'black');
     }
   }
@@ -495,6 +556,12 @@ x
   #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
 
   #keyEventActions = (event) => {
+    // exit from blank slide
+    if (this.hasAttribute('blank-slide')) {
+      event.preventDefault();
+      this.removeAttribute('blank-slide');
+      return;
+    }
 
     // always available
     if (this.#cmdOrCtrl(event)) {
