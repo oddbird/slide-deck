@@ -49,7 +49,7 @@ class slideDeck extends HTMLElement {
         <dialog part="blank-slide">
           <form method="dialog">
             <button part="close-blank-slide">
-              <span>x<span>
+              <span aria-label="close">x<span>
             </button>
           </form>
         </dialog>
