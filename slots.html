@@ -30,8 +30,18 @@
         <p><strong>command-k</strong> to open</p>
       </div>
       <div>
+        <h2>Custom blank screen</h2>
+        <button slide-event>blankSlide</button>
+      </div>
+      <div>
         <a href="./index.html">Back to demo</a>
       </div>
+      <dialog slot="blank-slide" part="blank-slide">
+        Could be a place to add custom branding
+        <form method="dialog">
+          <button>x</button>
+        </form>
+      </dialog>
     </slide-deck>
 
   </body>
