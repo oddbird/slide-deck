@@ -12,8 +12,8 @@ until we achieve a stable v1.0 release
 - 💥 BREAKING: Removed the 'end presentation' event
   and keyboard shortcuts, which were more confusing than useful
 - 💥 BREAKING: Removed the shadow DOM content wrapper,
-  and all shadow DOM styles
-- 💥 BREAKING: The `reset` targets the first slide
+  and all shadow DOM styles for slide layout
+- 💥 BREAKING: The `reset` event targets the first slide
   rather than the slide-deck container
 - 🚀 NEW / 💥 BREAKING: Renamed and added control-panel parts,
   to allow for more customization of the default panel
@@ -31,6 +31,9 @@ until we achieve a stable v1.0 release
   and can be applied from the light DOM
 - 🚀 NEW: The entire control panel can be replaced
   from the light DOM using `slot=control-panel`
+  on a slotted `dialog` element
+- 🚀 NEW: Blank slides are implemented as shadow DOM dialogues,
+  which can be replaced from the light DOM using `slot=blank-slide`
   on a slotted `dialog` element
 - 🚀 NEW: When `key-control` is activated (including on-load),
   we target the stored active slide (or the first slide)
