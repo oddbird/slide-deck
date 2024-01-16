@@ -79,7 +79,6 @@ Always available:
 - `command-shift-enter`: Start presentation (from first slide)
 - `command-enter`: Resume presentation (from active slide)
 - `command-.`: End presentation
-- `command-shift-f`: Toggle full-screen mode
 
 *Windows and Linux users can use Ctrl instead of Command.*
 

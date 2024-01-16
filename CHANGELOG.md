@@ -4,28 +4,39 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.1.2 - unreleased
+## v0.1.2 - 2024-01-11
 
+- 💥 BREAKING: Disabled the full-screen keyboard shortcut,
+  until we have a chance to address the various
+  fullscreen browser issues
+- 💥 BREAKING: Removed the 'end presentation' event
+  and keyboard shortcuts, which were more confusing than useful
+- 💥 BREAKING: Removed the shadow DOM content wrapper,
+  and all shadow DOM styles
+- 💥 BREAKING: The `reset` targets the first slide
+  rather than the slide-deck container
+- 🚀 NEW / 💥 BREAKING: Renamed and added control-panel parts,
+  to allow for more customization of the default panel
+  including pressed buttons with `:part(button pressed)`
 - 🚀 NEW: Set `aria-current='true'` on active slide
+- 🚀 NEW: View settings are maintained across page refresh
+  using `sessionStorage`
 - 🚀 NEW: Add support for slide parts – `slide-canvas` & `slide-note`
 - 🚀 NEW: Each slide is labeled with either
   `slide-item='container'` (if it has nested parts)
   or `slide-item='canvas' slide-canvas` (if there are no nested parts)
 - 🚀 NEW: The slide-deck has a `--slide-count` property,
   and each slide has a `--slide-index`
-- 💥 BREAKING: Removed the shadow DOM content wrapper,
-  and all shadow DOM styles
-- 🚀 NEW / 💥 BREAKING: Renamed and added control-panel parts,
-  to allow for more customization of the default panel
-  including pressed buttons with `:part(button pressed)`
 - 🚀 NEW: Default styles are in `slide-deck.css`
   and can be applied from the light DOM
 - 🚀 NEW: The entire control panel can be replaced
   from the light DOM using `slot=control-panel`
   on a slotted `dialog` element
-- 🐞 FIXED: Slotted controls are no longer treated as slides
 - 🚀 NEW: When `key-control` is activated (including on-load),
   we target the stored active slide (or the first slide)
+- 🚀 NEW: Support for keyboard shortcuts on Windows/Linux
+  using `control` instead of `command`
+- 🐞 FIXED: Slotted controls are no longer treated as slides
 - 🐞 FIXED: When restoring the active slide from memory,
   we go to the first slide if there's no stored state
 - 🐞 FIXED: Use any key to exit a blank-slide mode
