@@ -4,7 +4,7 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.1.2 - 2024-01-11
+## v0.1.2 - 2024-01-16
 
 - 💥 BREAKING: Disabled the full-screen keyboard shortcut,
   until we have a chance to address the various
