@@ -240,9 +240,9 @@ class slideDeck extends HTMLElement {
     this.addEventListener('reset', (e) => this.resetEvent());
     this.addEventListener('blankSlide', (e) => this.blankSlideEvent());
 
-    this.addEventListener('nextSlide', (e) => this.move(1));
+    this.addEventListener('next', (e) => this.move(1));
     this.addEventListener('savedSlide', (e) => this.goToSaved());
-    this.addEventListener('previousSlide', (e) => this.move(-1));
+    this.addEventListener('previous', (e) => this.move(-1));
   };
 
   connectedCallback() {
