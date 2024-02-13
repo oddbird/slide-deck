@@ -1,6 +1,6 @@
 slide-deck {
   --gap: clamp(8px, 0.25em + 1vw, 16px);
-  --slide-border: thin solid gray;
+  --default-slide-border: thin solid gray;
   container: slide-deck slide / inline-size;
   display: grid;
 }
@@ -16,7 +16,7 @@ slide-deck {
 }
 
 [slide-view=grid] {
-  --apply-slide-border: thin solid gray;
+  --slide-canvas-border: var(--default-slide-border);
   --slide-note-margin-block: var(--gap);
   grid-template-columns: repeat(auto-fill, minmax(min(50ch, 100%), 1fr));
 }
@@ -29,7 +29,7 @@ slide-deck {
   }
 
   [slide-canvas] {
-    border-block-end: var(--slide-border);
+    border-block-end: var(--default-slide-border);
   }
 
   [slide-note] {
@@ -38,7 +38,7 @@ slide-deck {
 }
 
 [slide-view=script] {
-  --apply-slide-border: thin solid gray;
+  --slide-canvas-border: var(--default-slide-border);
   --column-gap: calc(1.25em + 2vw);
   --row-gap: 5em;
   display: grid;
@@ -76,7 +76,7 @@ slide-deck {
 
 [slide-canvas] {
   aspect-ratio: var(--slide-ratio);
-  border: var(--apply-slide-border);
+  border: var(--slide-canvas-border);
   container: slide / inline-size;
   padding: var(--gap);
 

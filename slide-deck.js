@@ -199,6 +199,7 @@ class slideDeck extends HTMLElement {
   #blankSlide;
   #eventButtons;
   #viewButtons;
+  #goToButtons;
   #body;
 
   // callbacks
@@ -245,6 +246,7 @@ class slideDeck extends HTMLElement {
     // buttons
     this.#setupEventButtons();
     this.#setupViewButtons();
+    this.#setupGoToButtons();
 
     // shadow DOM event listeners
     this.shadowRoot.addEventListener('keydown', (event) => {
@@ -290,6 +292,8 @@ class slideDeck extends HTMLElement {
   }
 
   // setup methods
+  #cleanString = (str) => str.trim().toLowerCase();
+
   #newDeckId = (from, count) => {
     const base = from || window.location.pathname.split('.')[0];
     const ID = count ? `${base}-${count}` : base;
@@ -323,14 +327,6 @@ class slideDeck extends HTMLElement {
       slide.id = this.#slideId(slideIndex);
       slide.style.setProperty('--slide-index', slideIndex);
       slide.style.setProperty('--slide-index-string', `'${slideIndex}'`);
-
-      slide.querySelectorAll(':scope button[slide-activate]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          this.goTo(slideIndex)
-          const inView = btn.getAttribute('slide-activate');
-          if (inView) { this.setAttribute('slide-view', inView); }
-        });
-      });
 
       if (slide.querySelector(':scope [slide-canvas]')) {
         if (!slide.hasAttribute('slide-item')) {
@@ -367,7 +363,7 @@ class slideDeck extends HTMLElement {
     ...this.shadowRoot.querySelectorAll(`button[${attr}]`),
   ];
 
-  #getButtonValue = (btn, attr) => btn.getAttribute(attr) || btn.innerText.trim();
+  #getButtonValue = (btn, attr) => this.#cleanString(btn.getAttribute(attr) || btn.innerText);
 
   #setButtonPressed = (btn, isPressed) => {
     btn.setAttribute('aria-pressed', isPressed);
@@ -391,6 +387,23 @@ class slideDeck extends HTMLElement {
   #setToggleState = (btn, attr, state) => {
     const isActive = this.#getButtonValue(btn, attr) === state;
     this.#setButtonPressed(btn, isActive);
+  }
+
+  #setupGoToButtons = () => {
+    this.#goToButtons = this.#findButtons('to-slide');
+
+    this.#goToButtons.forEach((btn) => {
+      const btnValue = btn.getAttribute('to-slide');
+      const btnSlide = btn.closest("[slide-item]");
+
+      const toSlide = btnValue
+        ? this.#asSlideInt(btnValue)
+        : this.#indexFromId(btnSlide.id);
+
+      btn.addEventListener('click', (e) => {
+        this.goTo(toSlide);
+      });
+    });
   }
 
   #setupViewButtons = () => {
