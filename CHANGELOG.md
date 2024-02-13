@@ -6,6 +6,11 @@ until we achieve a stable v1.0 release
 
 ## v0.1.3 - UNRELEASED
 
+- 💥 BREAKING: All events and `slide-event` controls use
+  lowercase hyphenated names, for consistency with html conventions
+  (`toggleControl` -> `toggle-control`,
+  `toggleFollow` -> `toggle-follow`,
+  `toggleFullscreen` -> `toggle-fullscreen`)
 - 🚀 NEW: Use the `to-slide` attribute on buttons in the slide deck
   to move focus to any slide -- either the parent slide of the button,
   or the slide index given as a value of the attribute
