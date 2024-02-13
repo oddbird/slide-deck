@@ -13,7 +13,7 @@ class slideDeck extends HTMLElement {
             </form>
           </div>
           <div part="controls">
-            <button part="button" slide-event='toggleControl'>
+            <button part="button" slide-event='toggle-control'>
               keyboard navigation
             </button>
 
@@ -211,7 +211,6 @@ class slideDeck extends HTMLElement {
         break;
       case 'follow-active':
         this.#followActiveChange();
-        this.#updateEventButtons();
         break;
       case 'slide-view':
         this.#onViewChange();
@@ -266,21 +265,21 @@ class slideDeck extends HTMLElement {
     })
 
     // custom events
-    this.addEventListener('toggleControl', (e) => this.toggleAttribute('key-control'));
-    this.addEventListener('toggleFollow', (e) => this.toggleAttribute('follow-active'));
-    this.addEventListener('toggleFullscreen', (e) => this.fullScreenEvent());
+    this.addEventListener('toggle-control', (e) => this.toggleAttribute('key-control'));
+    this.addEventListener('toggle-follow', (e) => this.toggleAttribute('follow-active'));
+    this.addEventListener('toggle-fullscreen', (e) => this.fullScreenEvent());
 
     this.addEventListener('join', (e) => this.joinEvent());
     this.addEventListener('start', (e) => this.startEvent());
     this.addEventListener('resume', (e) => this.resumeEvent());
     this.addEventListener('reset', (e) => this.resetEvent());
-    this.addEventListener('blankSlide', (e) => this.blankSlideEvent());
-    this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
+    this.addEventListener('blank-slide', (e) => this.blankSlideEvent());
+    this.addEventListener('join-with-notes', (e) => this.joinWithNotesEvent());
 
     this.addEventListener('next', (e) => this.move(1));
-    this.addEventListener('savedSlide', (e) => this.goToSaved());
+    this.addEventListener('saved-slide', (e) => this.goToSaved());
     this.addEventListener('previous', (e) => this.move(-1));
-    this.addEventListener('goToSlide', (e) => this.goTo(e.detail));
+    this.addEventListener('to-slide', (e) => this.goTo(e.detail));
   };
 
   connectedCallback() {
@@ -363,7 +362,9 @@ class slideDeck extends HTMLElement {
     ...this.shadowRoot.querySelectorAll(`button[${attr}]`),
   ];
 
-  #getButtonValue = (btn, attr) => this.#cleanString(btn.getAttribute(attr) || btn.innerText);
+  #getButtonValue = (btn, attr, lower=true) => this.#cleanString(
+    btn.getAttribute(attr) || btn.innerText
+  );
 
   #setButtonPressed = (btn, isPressed) => {
     btn.setAttribute('aria-pressed', isPressed);
@@ -449,9 +450,9 @@ class slideDeck extends HTMLElement {
       const btnEvent = this.#getButtonValue(btn, 'slide-event');
 
       let isActive = {
-        'toggleControl': this.keyControl,
-        'toggleFollow': this.followActive,
-        'toggleFullscreen': this.fullScreen,
+        'toggle-control': this.keyControl,
+        'toggle-follow': this.followActive,
+        'toggle-fullscreen': this.fullScreen,
       }
 
       if (Object.keys(isActive).includes(btnEvent)) {
