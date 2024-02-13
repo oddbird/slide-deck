@@ -4,6 +4,18 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.1.3 - UNRELEASED
+
+- 🚀 NEW: Use the `to-slide` attribute on buttons in the slide deck
+  to move focus to any slide -- either the parent slide of the button,
+  or the slide index given as a value of the attribute
+- 🚀 NEW: Custom `goToSlide` event accepts an integer value
+  in the `event.detail` property
+- 🚀 NEW: `--slide-count-string` and `--slide-index-string`
+  can be used for CSS generated content
+- 🐞 FIXED: Less nesting for lower specificity in the `slide-deck.css` theme
+- 🐞 FIXED: Provide shadow-DOM control-panel styles
+
 ## v0.1.2 - 2024-01-16
 
 - 💥 BREAKING: Disabled the full-screen keyboard shortcut,

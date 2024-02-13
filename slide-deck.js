@@ -24,10 +24,10 @@ class slideDeck extends HTMLElement {
               start
             </button>
             <button part="button event" slide-event>
-              reset
+              resume
             </button>
-            <button part="button event" slide-event="joinWithNotes">
-              speaker view
+            <button part="button event" slide-event>
+              reset
             </button>
 
             <hr>
@@ -63,6 +63,41 @@ class slideDeck extends HTMLElement {
   static #adoptShadowStyles = (node) => {
     const shadowStyle = new CSSStyleSheet();
     shadowStyle.replaceSync(`
+      [part=control-panel] {
+        --sd-panel-gap: clamp(8px, 0.25em + 1vw, 24px);
+        min-width: min(50ch, 100%);
+        padding: 0;
+      }
+
+      [part=panel-header] {
+        align-items: center;
+        border-block-end: thin solid gray;
+        display: grid;
+        gap: var(--sd-panel-gap);
+        grid-template-columns: 1fr auto;
+        padding: var(--sd-panel-gap);
+      }
+
+      [part=controls] {
+        padding: var(--sd-panel-gap);
+      }
+
+      hr {
+        border-block-start: thin dotted gray;
+        border-block-end: none;
+        margin-block: 1lh;
+      }
+
+      [part~=button] {
+        border: medium solid transparent;
+        font: inherit;
+        padding-inline: var(--sd-panel-gap);
+
+        &[aria-pressed=true] {
+          border-color: currentColor;
+        }
+      }
+
       [part=blank-slide],
       ::slotted([slot=blank-slide]) {
         block-size: 100%;
@@ -164,6 +199,7 @@ class slideDeck extends HTMLElement {
   #blankSlide;
   #eventButtons;
   #viewButtons;
+  #goToButtons;
   #body;
 
   // callbacks
@@ -210,6 +246,7 @@ class slideDeck extends HTMLElement {
     // buttons
     this.#setupEventButtons();
     this.#setupViewButtons();
+    this.#setupGoToButtons();
 
     // shadow DOM event listeners
     this.shadowRoot.addEventListener('keydown', (event) => {
@@ -234,15 +271,16 @@ class slideDeck extends HTMLElement {
     this.addEventListener('toggleFullscreen', (e) => this.fullScreenEvent());
 
     this.addEventListener('join', (e) => this.joinEvent());
-    this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
     this.addEventListener('start', (e) => this.startEvent());
     this.addEventListener('resume', (e) => this.resumeEvent());
     this.addEventListener('reset', (e) => this.resetEvent());
     this.addEventListener('blankSlide', (e) => this.blankSlideEvent());
+    this.addEventListener('joinWithNotes', (e) => this.joinWithNotesEvent());
 
     this.addEventListener('next', (e) => this.move(1));
     this.addEventListener('savedSlide', (e) => this.goToSaved());
     this.addEventListener('previous', (e) => this.move(-1));
+    this.addEventListener('goToSlide', (e) => this.goTo(e.detail));
   };
 
   connectedCallback() {
@@ -254,6 +292,8 @@ class slideDeck extends HTMLElement {
   }
 
   // setup methods
+  #cleanString = (str) => str.trim().toLowerCase();
+
   #newDeckId = (from, count) => {
     const base = from || window.location.pathname.split('.')[0];
     const ID = count ? `${base}-${count}` : base;
@@ -280,11 +320,13 @@ class slideDeck extends HTMLElement {
     this.slides = this.querySelectorAll(':scope > :not([slot])');
     this.slideCount = this.slides.length;
     this.style.setProperty('--slide-count', this.slideCount);
+    this.style.setProperty('--slide-count-string', `'${this.slideCount}'`);
 
     this.slides.forEach((slide, index) => {
       const slideIndex = index + 1;
       slide.id = this.#slideId(slideIndex);
       slide.style.setProperty('--slide-index', slideIndex);
+      slide.style.setProperty('--slide-index-string', `'${slideIndex}'`);
 
       if (slide.querySelector(':scope [slide-canvas]')) {
         if (!slide.hasAttribute('slide-item')) {
@@ -321,7 +363,7 @@ class slideDeck extends HTMLElement {
     ...this.shadowRoot.querySelectorAll(`button[${attr}]`),
   ];
 
-  #getButtonValue = (btn, attr) => btn.getAttribute(attr) || btn.innerText;
+  #getButtonValue = (btn, attr) => this.#cleanString(btn.getAttribute(attr) || btn.innerText);
 
   #setButtonPressed = (btn, isPressed) => {
     btn.setAttribute('aria-pressed', isPressed);
@@ -345,6 +387,23 @@ class slideDeck extends HTMLElement {
   #setToggleState = (btn, attr, state) => {
     const isActive = this.#getButtonValue(btn, attr) === state;
     this.#setButtonPressed(btn, isActive);
+  }
+
+  #setupGoToButtons = () => {
+    this.#goToButtons = this.#findButtons('to-slide');
+
+    this.#goToButtons.forEach((btn) => {
+      const btnValue = btn.getAttribute('to-slide');
+      const btnSlide = btn.closest("[slide-item]");
+
+      const toSlide = btnValue
+        ? this.#asSlideInt(btnValue)
+        : this.#indexFromId(btnSlide.id);
+
+      btn.addEventListener('click', (e) => {
+        this.goTo(toSlide);
+      });
+    });
   }
 
   #setupViewButtons = () => {
@@ -418,6 +477,10 @@ class slideDeck extends HTMLElement {
     this.#startPresenting();
   }
 
+  resetEvent = () => {
+    this.goTo(1);
+  }
+
   joinWithNotesEvent = () => {
     this.setAttribute('slide-view', 'script');
     this.setAttribute('key-control', '');
@@ -427,10 +490,6 @@ class slideDeck extends HTMLElement {
   joinEvent = () => {
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
-  }
-
-  resetEvent = () => {
-    this.goTo(1);
   }
 
   blankSlideEvent = (color) => {
