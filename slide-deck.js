@@ -291,7 +291,7 @@ class slideDeck extends HTMLElement {
   }
 
   // setup methods
-  #cleanString = (str, lower = true) => str.trim().toLowerCase();
+  #cleanString = (str) => str.trim().toLowerCase();
 
   #newDeckId = (from, count) => {
     const base = from || window.location.pathname.split('.')[0];
