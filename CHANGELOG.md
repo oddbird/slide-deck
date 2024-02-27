@@ -4,6 +4,11 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.1.4 - unreleased
+
+- 🐞 FIXED: session view preference overrides attribute
+  when deck is first constructed
+
 ## v0.1.3 - 2024-02-13
 
 - 💥 BREAKING: All events and `slide-event` controls use

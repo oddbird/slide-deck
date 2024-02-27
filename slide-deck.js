@@ -345,12 +345,10 @@ class slideDeck extends HTMLElement {
 
   #defaultAttrs = () => {
     // view required
-    if (!this.slideView) {
-      this.setAttribute(
-        'slide-view',
-        sessionStorage.getItem(this.#store.view) || 'grid'
-      );
-    }
+    this.setAttribute(
+      'slide-view',
+      sessionStorage.getItem(this.#store.view) || this.slideView || 'grid'
+    );
 
     // fullscreen must be set by user interaction
     this.removeAttribute('full-screen');
