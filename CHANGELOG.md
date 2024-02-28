@@ -4,7 +4,7 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.1.4 - unreleased
+## v0.1.4 - 2024-02-28
 
 - 🐞 FIXED: session view preference overrides attribute
   when deck is first constructed
