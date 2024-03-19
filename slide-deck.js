@@ -230,13 +230,6 @@ class slideDeck extends HTMLElement {
     slideDeck.#adoptShadowStyles(this);
     this.#setDeckID();
 
-    // shadowRoot events
-    this.shadowRoot.addEventListener('keydown', (event) => {
-      event.stopPropagation();
-      this.#blankSlideKeyEvents(event);
-      this.#controlPanelKeyEvents(event);
-    })
-
     // custom events
     this.addEventListener('toggle-control', (e) => this.toggleAttribute('key-control'));
     this.addEventListener('toggle-follow', (e) => this.toggleAttribute('follow-active'));
@@ -605,66 +598,46 @@ class slideDeck extends HTMLElement {
     this.removeAttribute('blank-slide');
   }
 
-  #blankSlideKeyEvents = (event) => {
-    if (this.#blankSlide.open) {
+  #escToBlur = (event) => {
+    if (event.key === 'Escape') {
       event.preventDefault();
-      this.blankSlide();
-    }
-  }
-
-  #controlPanelKeyEvents = (event) => {
-    const closeKeys = (event.key === 'k' && this.#cmdOrCtrl(event)) || event.key === 'Escape';
-
-    if (closeKeys && this.#controlPanel.open) {
-      event.preventDefault();
-      this.#controlPanel.close();
+      event.target.blur();
+      return true;
     }
   }
 
   #bodyKeyEvents = (event) => {
-    if (this.#controlPanel.open) {
-      this.#controlPanelKeyEvents(event);
+    // modal events
+    if (event.key === 'k' && this.#cmdOrCtrl(event)) {
+      this.#controlPanel.open
+        ? this.#controlPanel.close()
+        : this.#controlPanel.showModal();
+    } else if (this.#controlPanel.open) {
+      this.#escToBlur(event) && this.#controlPanel.close();
       return;
-    }
-
-    if (this.#blankSlide.open) {
-      this.#blankSlideKeyEvents(event);
-      return;
-    }
-
-    // always available
-    if (this.#cmdOrCtrl(event)) {
-      switch (event.key) {
-        case 'k':
-          event.preventDefault();
-          this.#controlPanel.showModal();
-          break;
-        case 'Enter':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.start();
-          } else {
-            event.preventDefault();
-            this.resume();
-          }
-          break;
-
-        default:
-          break;
-      }
-      return;
-    } else if (event.altKey && event.key === 'Enter') {
+    } else if (this.#blankSlide.open && !this.#cmdOrCtrl(event)) {
       event.preventDefault();
-      this.joinAsSpeaker();
+      this.blankSlide();
+      return;
+    }
+
+    // always available, quickstart
+    if (event.key === 'Enter') {
+      if (this.#cmdOrCtrl(event)) {
+        event.preventDefault();
+        event.shiftKey ? this.start(): this.resume();
+      } else if (event.altKey) {
+        event.preventDefault();
+        this.joinAsSpeaker();
+      }
+
       return;
     }
 
     // only while key-control is active
     if (this.keyControl) {
-      if (event.key === 'Escape') {
-        if (event.target !== this.#body) {
-          event.target.blur();
-        }
+      if (event.target !== this.#body) {
+        this.#escToBlur(event);
         return;
       }
 
