@@ -10,7 +10,7 @@
     <script type="module" src="slide-deck.js"></script>
   </head>
   <body>
-    <slide-deck id="my-slides" key-control slide-view="presentation">
+    <slide-deck id="my-slides" key-control>
       <header>
         <div slide-canvas>
           <h1>Slide-Deck Web Component</h1>
@@ -21,9 +21,9 @@
           </p>
           <p>
             View as…
-            <button set-view="grid">grid</button>
-            <button set-view="speaker">speaker</button>
-            <button set-view="presentation">slideshow presentation</button>
+            <button set-view>grid</button>
+            <button set-view>slideshow</button>
+            <button set-view>speaker</button>
           </p>
           <p>
             Use arrow keys to navigate. Or scroll instead.
@@ -36,7 +36,7 @@
       </header>
       <div>
         <h2>No Dependencies</h2>
-        <p>This is a stand-alone web compontent</p>
+        <p>This is a stand-alone web component</p>
       </div>
       <div>
         <div slide-canvas>
@@ -147,11 +147,10 @@
         <div slide-note>
           <p>
             Starting a presentation
-            takes you into full-page slide view,
+            takes you into the slideshow view,
             with keyboard controls on,
             and following active-slide changes in local-storage
-            (in case you are using multiple tabs
-            for differnt views).
+            (in case you are using multiple tabs for different views).
           </p>
         </div>
       </div>
@@ -245,8 +244,8 @@
             <button slide-event>next</button>
             <button slide-event>reset</button>
             <hr>
-            <button set-view="presentation" to-slide>
-              go to this slide, in presentation view
+            <button set-view="slideshow" to-slide>
+              go to this slide, in slideshow view
             </button>
             <button to-slide="6">
               go to slide 6
@@ -264,9 +263,9 @@
       </div>
       <div>
         <div slide-canvas>
-          <h2><code>&lt;button set-view&gt;presentation&lt;button&gt;</code></h2>
+          <h2><code>&lt;button set-view&gt;slideshow&lt;button&gt;</code></h2>
           <div>
-            <button set-view>presentation</button>
+            <button set-view>slideshow</button>
             <button set-view>grid</button>
             <button set-view>speaker</button>
           </div>

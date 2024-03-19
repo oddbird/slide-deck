@@ -7,7 +7,7 @@ until we achieve a stable v1.0 release
 ## v0.2.0 - UNRELEASED
 
 - 💥 BREAKING: The component itself is only aware of two 'built-in' views,
-  named `presentation` (used for `start` and `resume` events)
+  named `slideshow` (used for `start` and `resume` events)
   and `speaker` (used for the `join-as-speaker` event)
 - 💥 BREAKING: Renamed the custom event handlers and matching public methods:
   - `reset` = `reset()`
@@ -18,9 +18,9 @@ until we achieve a stable v1.0 release
   - `blank-slide` = `blankSlide()`
   - `next` = `next()`
   - `previous` = `previous()`
-  - `to-slide` = `goTo()`
-  - `to-saved` = `goToSaved()`
-  - `to-saved` = `goToSaved()`
+  - `to-slide` = `toSlide()`
+  - `to-saved` = `toSavedSlide()`
+  - `scroll-to-active` = `scrollToActive()`
   - `full-screen` = `toggleFullScreen()`
   - `key-control` = `toggleKeyControl()`
   - `follow-active` = `toggleFollowActive()`

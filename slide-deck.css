@@ -21,7 +21,7 @@ slide-deck {
   grid-template-columns: repeat(auto-fill, minmax(min(50ch, 100%), 1fr));
 }
 
-[slide-view=presentation] {
+[slide-view=slideshow] {
   grid-auto-rows: 100svh;
 
   [slide-item='container'] {

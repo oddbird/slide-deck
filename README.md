@@ -90,7 +90,7 @@ When presenting (`key-control` is active):
 - `end`: Last slide
 - `W`/`,`: Toggle white screen
 - `B`/`.`: Toggle black screen
-- `escape`: Blur focused element, close control panel, or end presentation
+- `escape`: Blur focused element or close control panel
 
 These are based on
 the [PowerPoint shortcuts](https://support.microsoft.com/en-us/office/use-keyboard-shortcuts-to-deliver-powerpoint-presentations-1524ffce-bd2a-45f4-9a7f-f18b992b93a0#bkmk_frequent_macos).
