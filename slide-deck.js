@@ -268,12 +268,12 @@ class slideDeck extends HTMLElement {
 
     // events
     this.#body.addEventListener('keydown', this.#bodyKeyEvents);
-    this.#blankSlide.addEventListener('close', this.#blankSlideCloseEvent);
+    this.#blankSlide.addEventListener('close', this.#blankSlideClosed);
   }
 
   disconnectedCallback() {
     this.#body.removeEventListener('keydown', this.#bodyKeyEvents);
-    this.#blankSlide.removeEventListener('close', this.#blankSlideCloseEvent);
+    this.#blankSlide.removeEventListener('close', this.#blankSlideClosed);
   }
 
   // --------------------------------------------------------------------------
@@ -474,11 +474,14 @@ class slideDeck extends HTMLElement {
   blankSlide = (color) => {
     if (this.#blankSlide.open) {
       this.#blankSlide.close();
-      this.removeAttribute('blank-slide');
     } else {
       this.#blankSlide.showModal();
       this.setAttribute('blank-slide', color || 'black');
     }
+  }
+
+  #blankSlideClosed = () => {
+    this.removeAttribute('blank-slide');
   }
 
   toggleFullScreen = () => {
@@ -593,10 +596,6 @@ class slideDeck extends HTMLElement {
 
   // Detect Ctrl / Cmd modifiers in a platform-agnostic way
   #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
-
-  #blankSlideCloseEvent = (event) => {
-    this.removeAttribute('blank-slide');
-  }
 
   #escToBlur = (event) => {
     if (event.key === 'Escape') {
