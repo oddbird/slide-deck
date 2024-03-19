@@ -1,5 +1,10 @@
 class slideDeck extends HTMLElement {
 
+  static knownViews = {
+    public: 'presentation',
+    private: 'speaker',
+  };
+
   // --------------------------------------------------------------------------
   // shadow DOM (control panel & blank slide)
 
@@ -17,13 +22,13 @@ class slideDeck extends HTMLElement {
           </div>
           <div part="controls">
             <button part="button event" slide-event="start">
-              start presenting
+              start presentation
             </button>
-            <button part="button event" slide-event>
+            <button part="button event">
               resume
             </button>
-            <button part="button event" slide-event="join-as-speaker">
-              speaker view
+            <button part="button event" slide-event>
+              join as speaker
             </button>
 
             <hr>
@@ -33,14 +38,14 @@ class slideDeck extends HTMLElement {
               grid
             </button>
             <button part="button view" set-view>
-              presentation
+              ${slideDeck.knownViews.public}
             </button>
             <button part="button view" set-view>
-              speaker
+              ${slideDeck.knownViews.private}
             </button>
 
             <hr>
-            <button part="button" slide-event='toggle-control'>
+            <button part="button" slide-event='key-control'>
               keyboard navigation
             </button>
           </div>
@@ -231,9 +236,9 @@ class slideDeck extends HTMLElement {
     this.#setDeckID();
 
     // custom events
-    this.addEventListener('toggle-control', (e) => this.toggleAttribute('key-control'));
-    this.addEventListener('toggle-follow', (e) => this.toggleAttribute('follow-active'));
-    this.addEventListener('toggle-fullscreen', (e) => this.toggleFullScreen());
+    this.addEventListener('key-control', (e) => this.toggleKeyControl());
+    this.addEventListener('follow-active', (e) => this.toggleFollowActive());
+    this.addEventListener('full-screen', (e) => this.toggleFullScreen());
 
     this.addEventListener('join', (e) => this.join());
     this.addEventListener('start', (e) => this.start());
@@ -242,10 +247,10 @@ class slideDeck extends HTMLElement {
     this.addEventListener('blank-slide', (e) => this.blankSlide());
     this.addEventListener('join-as-speaker', (e) => this.joinAsSpeaker());
 
-    this.addEventListener('next', (e) => this.move(1));
-    this.addEventListener('saved-slide', (e) => this.goToSaved());
-    this.addEventListener('previous', (e) => this.move(-1));
+    this.addEventListener('next', (e) => this.next());
+    this.addEventListener('previous', (e) => this.previous());
     this.addEventListener('to-slide', (e) => this.goTo(e.detail));
+    this.addEventListener('to-saved', (e) => this.goToSaved());
   };
 
   connectedCallback() {
@@ -457,7 +462,7 @@ class slideDeck extends HTMLElement {
   }
 
   resume = () => {
-    this.setAttribute('slide-view', 'presentation');
+    this.setAttribute('slide-view', slideDeck.knownViews.public);
     this.join();
   }
 
@@ -467,7 +472,7 @@ class slideDeck extends HTMLElement {
   }
 
   joinAsSpeaker = () => {
-    this.setAttribute('slide-view', 'speaker');
+    this.setAttribute('slide-view', slideDeck.knownViews.private);
     this.join();
   }
 
@@ -493,6 +498,9 @@ class slideDeck extends HTMLElement {
       document.exitFullscreen();
     }
   }
+
+  toggleKeyControl = () => this.toggleAttribute('key-control');
+  toggleFollowActive = () => this.toggleAttribute('follow-active');
 
   // --------------------------------------------------------------------------
   // attribute-change methods
@@ -586,6 +594,9 @@ class slideDeck extends HTMLElement {
     const to = (this.#getActive() || 0) + by;
     this.goTo(to);
   };
+
+  next = () => this.move(1);
+  previous = () => this.move(-1);
 
   goToSaved = () => {
     this.goTo(this.#slideFromStore());

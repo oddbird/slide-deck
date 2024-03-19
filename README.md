@@ -78,11 +78,11 @@ Always available:
 - `command-k`: Toggle control panel
 - `command-shift-enter`: Start presentation (from first slide)
 - `command-enter`: Resume presentation (from active slide)
-- `command-.`: End presentation
+- `alt-enter`: Join presentation in speaker view (from active slide)
 
 *Windows and Linux users can use Ctrl instead of Command.*
 
-When presenting (key-control is active):
+When presenting (`key-control` is active):
 
 - `N`/`rightArrow`/`downArrow`/`pageDown`: Next slide
 - `P`/`leftArrow`/`upArrow`/`pageUp`: Previous slide
