@@ -233,22 +233,22 @@ class slideDeck extends HTMLElement {
     this.#setDeckID();
 
     // custom events
-    this.addEventListener('key-control', (e) => this.toggleKeyControl());
-    this.addEventListener('follow-active', (e) => this.toggleFollowActive());
-    this.addEventListener('full-screen', (e) => this.toggleFullScreen());
+    this.addEventListener('key-control', this.toggleKeyControl);
+    this.addEventListener('follow-active', this.toggleFollowActive);
+    this.addEventListener('full-screen', this.toggleFullScreen);
 
-    this.addEventListener('join', (e) => this.join());
-    this.addEventListener('start', (e) => this.start());
-    this.addEventListener('resume', (e) => this.resume());
-    this.addEventListener('reset', (e) => this.reset());
-    this.addEventListener('blank-slide', (e) => this.blankSlide());
-    this.addEventListener('join-as-speaker', (e) => this.joinAsSpeaker());
+    this.addEventListener('join', this.join);
+    this.addEventListener('start', this.start);
+    this.addEventListener('resume', this.resume);
+    this.addEventListener('reset', this.reset);
+    this.addEventListener('blank-slide', this.blankSlide);
+    this.addEventListener('join-as-speaker', this.joinAsSpeaker);
 
-    this.addEventListener('next', (e) => this.next());
-    this.addEventListener('previous', (e) => this.previous());
+    this.addEventListener('next', this.next);
+    this.addEventListener('previous', this.previous);
     this.addEventListener('to-slide', (e) => this.toSlide(e.detail));
-    this.addEventListener('to-saved', (e) => this.toSavedSlide());
-    this.addEventListener('scroll-to-active', (e) => this.scrollToActive());
+    this.addEventListener('to-saved', this.toSavedSlide);
+    this.addEventListener('scroll-to-active', this.scrollToActive);
   };
 
   connectedCallback() {
@@ -438,9 +438,9 @@ class slideDeck extends HTMLElement {
       const btnEvent = this.#getButtonValue(btn, 'slide-event');
 
       let isActive = {
-        'toggle-control': this.keyControl,
-        'toggle-follow': this.followActive,
-        'toggle-fullscreen': this.fullScreen,
+        'key-control': this.keyControl,
+        'follow-active': this.followActive,
+        'full-screen': this.fullScreen,
       }
 
       if (Object.keys(isActive).includes(btnEvent)) {
