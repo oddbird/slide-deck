@@ -620,6 +620,7 @@ class slideDeck extends HTMLElement {
   #bodyKeyEvents = (event) => {
     // modal events
     if (event.key === 'k' && this.#cmdOrCtrl(event)) {
+      event.preventDefault();
       this.#controlPanel.open
         ? this.#controlPanel.close()
         : this.#controlPanel.showModal();
