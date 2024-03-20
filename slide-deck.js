@@ -24,7 +24,7 @@ class slideDeck extends HTMLElement {
             <button part="button event" slide-event="start">
               start slideshow
             </button>
-            <button part="button event">
+            <button part="button event" slide-event>
               resume
             </button>
             <button part="button event" slide-event>
@@ -282,7 +282,7 @@ class slideDeck extends HTMLElement {
   // --------------------------------------------------------------------------
   // setup methods
 
-  #cleanString = (str) => str.trim().toLowerCase().replace(' ', '-');
+  #cleanString = (str) => str.trim().toLowerCase().replaceAll(' ', '-');
 
   #newDeckId = (from, count) => {
     const base = from || window.location.pathname.split('.')[0];
