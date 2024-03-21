@@ -617,6 +617,54 @@ class slideDeck extends HTMLElement {
     }
   }
 
+  #isPrivateKeydown = (event) => {
+    // it's only private if the focus is somewhere else
+    if (event.target === this.#body) { return; }
+
+    // esc to blur, anywhere
+    if (this.#escToBlur(event)) { return true; }
+
+    // anything in an iframe is private
+    if (event.target.ownerDocument !== document) { return true; }
+
+    // anything in contentEditable is private
+    if (event.target.getAttribute('contenteditable')) { return true; }
+
+    // scrollable elements are private
+    const overflowStyle = window
+      .getComputedStyle(event.target)
+      .getPropertyValue('overflow');
+    const hasOverflow = (event.target.scrollHeight > event.target.clientHeight
+      || event.target.scrollWidth > event.target.clientWidth);
+
+    if (hasOverflow && overflowStyle !== 'hidden') { return true; }
+
+    // most form inputs are private…
+    switch (event.target.tagName) {
+      case 'TEXTAREA':
+      case 'SELECT':
+      case 'SUMMARY':
+        return true;
+      case 'A':
+        return event.key === 'Enter';
+      case 'INPUT':
+        const clickOnly = ['button', 'checkbox'];
+        const type = event.target.getAttribute('type').toLowerCase();
+        if (!clickOnly.includes(type)) { return true; }
+        break;
+      default:
+        break;
+    }
+
+    // click events are private by default
+    if ([' ', 'Enter'].includes(event.key)) { return true; };
+
+    // todo:
+    // - tab panels and tree menus?
+    // - non-summary disclosures? (should use buttons)
+    // https://webaim.org/techniques/keyboard/
+  }
+
   #bodyKeyEvents = (event) => {
     // modal events
     if (event.key === 'k' && this.#cmdOrCtrl(event)) {
@@ -648,10 +696,7 @@ class slideDeck extends HTMLElement {
 
     // only while key-control is active
     if (this.keyControl) {
-      if (event.target !== this.#body) {
-        this.#escToBlur(event);
-        return;
-      }
+      if (this.#isPrivateKeydown(event)) { return; }
 
       switch (slideDeck.controlKeys[event.key]) {
         case 'firstSlide':
