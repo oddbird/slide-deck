@@ -617,7 +617,7 @@ class slideDeck extends HTMLElement {
     }
   }
 
-  #isPrivateKeydown = (event) => {
+        const type = event.target.getAttribute('type')?.toLowerCase();
     // it's only private if the focus is somewhere else
     if (event.target === this.#body) { return; }
 
