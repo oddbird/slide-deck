@@ -4,6 +4,29 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.2.0 - UNRELEASED
+
+- 💥 BREAKING: The component itself is only aware of two 'built-in' views,
+  named `slideshow` (used for `start` and `resume` events)
+  and `speaker` (used for the `join-as-speaker` event)
+- 💥 BREAKING: Renamed the custom event handlers and matching public methods:
+  - `reset` = `reset()`
+  - `join` = `join()`
+  - `resume` = `resume()`
+  - `start` = `start()`
+  - `join-as-speaker` = `joinAsSpeaker()`
+  - `blank-slide` = `blankSlide()`
+  - `next` = `next()`
+  - `previous` = `previous()`
+  - `to-slide` = `toSlide()`
+  - `to-saved` = `toSavedSlide()`
+  - `scroll-to-active` = `scrollToActive()`
+  - `full-screen` = `toggleFullScreen()`
+  - `key-control` = `toggleKeyControl()`
+  - `follow-active` = `toggleFollowActive()`
+- 🐞 FIXED: Keyboard events are given proper priority, so that
+  (for example) you can open the control panel from a blank slide
+
 ## v0.1.4 - 2024-02-28
 
 - 🐞 FIXED: session view preference overrides attribute

@@ -10,7 +10,7 @@
     <script type="module" src="slide-deck.js"></script>
   </head>
   <body>
-    <slide-deck id="my-slides" key-control slide-view="solo">
+    <slide-deck id="my-slides" key-control>
       <header>
         <div slide-canvas>
           <h1>Slide-Deck Web Component</h1>
@@ -21,9 +21,9 @@
           </p>
           <p>
             View as…
-            <button set-view="grid">grid</button>
-            <button set-view="script">script</button>
-            <button set-view="solo">full-page</button>
+            <button set-view>grid</button>
+            <button set-view>slideshow</button>
+            <button set-view>speaker</button>
           </p>
           <p>
             Use arrow keys to navigate. Or scroll instead.
@@ -36,7 +36,7 @@
       </header>
       <div>
         <h2>No Dependencies</h2>
-        <p>This is a stand-alone web compontent</p>
+        <p>This is a stand-alone web component</p>
       </div>
       <div>
         <div slide-canvas>
@@ -62,7 +62,7 @@
             Slide notes are also HTML
           </h3>
           <p>
-            In <button set-view='script'>script view</button>
+            In <button set-view='speaker'>speaker view</button>
             the active slide-item will have a larger canvas size
             and the font-size of an active slides speaker notes is increased
             for easier readability.
@@ -140,17 +140,17 @@
             <li><strong>command-k</strong>: Toggle control panel</li>
             <li><strong>command-shift-enter</strong>: Start presentation (from first slide)</li>
             <li><strong>command-enter</strong>: Resume presentation (from active slide)</li>
+            <li><strong>alt-enter</strong>: Join presentation in speaker view (from active slide)</li>
           </ul>
           <p>Windows and Linux users can use Ctrl instead of Command.</p>
         </div>
         <div slide-note>
           <p>
             Starting a presentation
-            takes you into full-page slide view,
+            takes you into the slideshow view,
             with keyboard controls on,
             and following active-slide changes in local-storage
-            (in case you are using multiple tabs
-            for differnt views).
+            (in case you are using multiple tabs for different views).
           </p>
         </div>
       </div>
@@ -244,8 +244,8 @@
             <button slide-event>next</button>
             <button slide-event>reset</button>
             <hr>
-            <button set-view="solo" to-slide>
-              go to this slide, in solo view
+            <button set-view="slideshow" to-slide>
+              go to this slide, in slideshow view
             </button>
             <button to-slide="6">
               go to slide 6
@@ -263,11 +263,11 @@
       </div>
       <div>
         <div slide-canvas>
-          <h2><code>&lt;button set-view&gt;solo&lt;button&gt;</code></h2>
+          <h2><code>&lt;button set-view&gt;slideshow&lt;button&gt;</code></h2>
           <div>
-            <button set-view>solo</button>
+            <button set-view>slideshow</button>
             <button set-view>grid</button>
-            <button set-view>script</button>
+            <button set-view>speaker</button>
           </div>
         </div>
         <div slide-note>

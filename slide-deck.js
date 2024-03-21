@@ -1,5 +1,13 @@
 class slideDeck extends HTMLElement {
-  // template
+
+  static knownViews = {
+    public: 'slideshow',
+    private: 'speaker',
+  };
+
+  // --------------------------------------------------------------------------
+  // shadow DOM (control panel & blank slide)
+
   static #appendShadowTemplate = (node) => {
     const template = document.createElement("template");
     template.innerHTML = `
@@ -13,34 +21,29 @@ class slideDeck extends HTMLElement {
             </form>
           </div>
           <div part="controls">
-            <button part="button" slide-event='toggle-control'>
-              keyboard navigation
-            </button>
-
-            <hr>
-            <p><strong>Presentation:</strong></p>
-
-            <button part="button event" slide-event>
-              start
+            <button part="button event" slide-event="start">
+              start slideshow
             </button>
             <button part="button event" slide-event>
               resume
             </button>
             <button part="button event" slide-event>
-              reset
+              join as speaker
             </button>
 
             <hr>
             <p><strong>View:</strong></p>
 
             <button part="button view" set-view>
-              grid
+              ${slideDeck.knownViews.public}
             </button>
             <button part="button view" set-view>
-              solo
+              ${slideDeck.knownViews.private}
             </button>
-            <button part="button view" set-view>
-              script
+
+            <hr>
+            <button part="button" slide-event='key-control'>
+              keyboard navigation
             </button>
           </div>
         </dialog>
@@ -59,7 +62,6 @@ class slideDeck extends HTMLElement {
     shadowRoot.appendChild(template.content.cloneNode(true));
   }
 
-  // css
   static #adoptShadowStyles = (node) => {
     const shadowStyle = new CSSStyleSheet();
     shadowStyle.replaceSync(`
@@ -131,7 +133,9 @@ class slideDeck extends HTMLElement {
     node.shadowRoot.adoptedStyleSheets = [shadowStyle];
   }
 
-  // static
+  // --------------------------------------------------------------------------
+  // static properties
+
   static observedAttributes = [
     'key-control',
     'follow-active',
@@ -159,12 +163,6 @@ class slideDeck extends HTMLElement {
     'slide',
   ];
 
-  static slideViews = [
-    'grid',
-    'solo',
-    'script',
-  ];
-
   static controlKeys = {
     'Home': 'firstSlide',
     'End': 'lastSlide',
@@ -190,7 +188,9 @@ class slideDeck extends HTMLElement {
     ',': 'whiteOut',
   }
 
-  // dynamic
+  // --------------------------------------------------------------------------
+  // dynamic properties
+
   #store = {};
   slides;
   slideCount;
@@ -202,15 +202,17 @@ class slideDeck extends HTMLElement {
   #goToButtons;
   #body;
 
+  // --------------------------------------------------------------------------
   // callbacks
+
   attributeChangedCallback(name) {
 
     switch (name) {
       case 'key-control':
-        this.#keyControlChange();
+        this.#onKeyControlChange();
         break;
       case 'follow-active':
-        this.#followActiveChange();
+        this.#onFollowActiveChange();
         break;
       case 'slide-view':
         this.#onViewChange();
@@ -230,6 +232,26 @@ class slideDeck extends HTMLElement {
     slideDeck.#adoptShadowStyles(this);
     this.#setDeckID();
 
+    // custom events
+    this.addEventListener('key-control', this.toggleKeyControl);
+    this.addEventListener('follow-active', this.toggleFollowActive);
+    this.addEventListener('full-screen', this.toggleFullScreen);
+
+    this.addEventListener('join', this.join);
+    this.addEventListener('start', this.start);
+    this.addEventListener('resume', this.resume);
+    this.addEventListener('reset', this.reset);
+    this.addEventListener('blank-slide', this.blankSlide);
+    this.addEventListener('join-as-speaker', this.joinAsSpeaker);
+
+    this.addEventListener('next', this.next);
+    this.addEventListener('previous', this.previous);
+    this.addEventListener('to-slide', (e) => this.toSlide(e.detail));
+    this.addEventListener('to-saved', this.toSavedSlide);
+    this.addEventListener('scroll-to-active', this.scrollToActive);
+  };
+
+  connectedCallback() {
     // relevant nodes
     this.#body = document.querySelector('body');
     this.#controlPanel = this.querySelector(`[slot="control-panel"]`) ??
@@ -240,58 +262,27 @@ class slideDeck extends HTMLElement {
     // initial setup
     this.#defaultAttrs();
     this.#setupSlides();
-    this.goTo();
+    this.toSlide();
 
     // buttons
     this.#setupEventButtons();
     this.#setupViewButtons();
     this.#setupGoToButtons();
 
-    // shadow DOM event listeners
-    this.shadowRoot.addEventListener('keydown', (event) => {
-      event.stopPropagation();
-
-      if (this.hasAttribute('blank-slide')) {
-        event.preventDefault();
-        this.blankSlideEvent();
-      } else if ((event.key === 'k' && this.#cmdOrCtrl(event)) || event.key === 'Escape') {
-        event.preventDefault();
-        this.#controlPanel.close();
-      }
-    });
-
-    this.#blankSlide.addEventListener('close', (event) => {
-      this.removeAttribute('blank-slide');
-    })
-
-    // custom events
-    this.addEventListener('toggle-control', (e) => this.toggleAttribute('key-control'));
-    this.addEventListener('toggle-follow', (e) => this.toggleAttribute('follow-active'));
-    this.addEventListener('toggle-fullscreen', (e) => this.fullScreenEvent());
-
-    this.addEventListener('join', (e) => this.joinEvent());
-    this.addEventListener('start', (e) => this.startEvent());
-    this.addEventListener('resume', (e) => this.resumeEvent());
-    this.addEventListener('reset', (e) => this.resetEvent());
-    this.addEventListener('blank-slide', (e) => this.blankSlideEvent());
-    this.addEventListener('join-with-notes', (e) => this.joinWithNotesEvent());
-
-    this.addEventListener('next', (e) => this.move(1));
-    this.addEventListener('saved-slide', (e) => this.goToSaved());
-    this.addEventListener('previous', (e) => this.move(-1));
-    this.addEventListener('to-slide', (e) => this.goTo(e.detail));
-  };
-
-  connectedCallback() {
-    this.#body.addEventListener('keydown', this.#keyEventActions);
+    // events
+    this.#body.addEventListener('keydown', this.#bodyKeyEvents);
+    this.#blankSlide.addEventListener('close', this.#onBlankSlideClosed);
   }
 
   disconnectedCallback() {
-    this.#body.removeEventListener('keydown', this.#keyEventActions);
+    this.#body.removeEventListener('keydown', this.#bodyKeyEvents);
+    this.#blankSlide.removeEventListener('close', this.#onBlankSlideClosed);
   }
 
+  // --------------------------------------------------------------------------
   // setup methods
-  #cleanString = (str) => str.trim().toLowerCase();
+
+  #cleanString = (str) => str.trim().toLowerCase().replaceAll(' ', '-');
 
   #newDeckId = (from, count) => {
     const base = from || window.location.pathname.split('.')[0];
@@ -347,14 +338,18 @@ class slideDeck extends HTMLElement {
     // view required
     this.setAttribute(
       'slide-view',
-      sessionStorage.getItem(this.#store.view) || this.slideView || 'grid'
+      sessionStorage.getItem(this.#store.view)
+        || this.slideView
+        || slideDeck.knownViews.public
     );
 
     // fullscreen must be set by user interaction
     this.removeAttribute('full-screen');
   };
 
-  // buttons
+  // --------------------------------------------------------------------------
+  // button setup
+
   #findButtons = (attr) => [
     ...this.querySelectorAll(`:scope button[${attr}]`),
     ...this.shadowRoot.querySelectorAll(`button[${attr}]`),
@@ -383,11 +378,12 @@ class slideDeck extends HTMLElement {
     }
   }
 
-  #setToggleState = (btn, attr, state) => {
+  #setButtonToggleState = (btn, attr, state) => {
     const isActive = this.#getButtonValue(btn, attr) === state;
     this.#setButtonPressed(btn, isActive);
   }
 
+  // go-to buttons
   #setupGoToButtons = () => {
     this.#goToButtons = this.#findButtons('to-slide');
 
@@ -400,11 +396,12 @@ class slideDeck extends HTMLElement {
         : this.#indexFromId(btnSlide.id);
 
       btn.addEventListener('click', (e) => {
-        this.goTo(toSlide);
+        this.toSlide(toSlide);
       });
     });
   }
 
+  // view buttons
   #setupViewButtons = () => {
     this.#viewButtons = this.#findButtons('set-view');
 
@@ -412,21 +409,14 @@ class slideDeck extends HTMLElement {
       btn.addEventListener('click', (e) => {
         this.setAttribute('slide-view', this.#getButtonValue(btn, 'set-view'));
       });
-      this.#setToggleState(btn, 'set-view', this.slideView);
+      this.#setButtonToggleState(btn, 'set-view', this.slideView);
     });
   }
 
   #updateViewButtons = () => {
-    this.#viewButtons.forEach((btn) => {
-      this.#setToggleState(btn, 'set-view', this.slideView);
+    this.#viewButtons?.forEach((btn) => {
+      this.#setButtonToggleState(btn, 'set-view', this.slideView);
     });
-  }
-
-  // attribute changes
-  #onViewChange = () => {
-    this.#updateViewButtons();
-    this.scrollToActive();
-    sessionStorage.setItem(this.#store.view, this.slideView);
   }
 
   // event buttons
@@ -444,13 +434,13 @@ class slideDeck extends HTMLElement {
   }
 
   #updateEventButtons = () => {
-    this.#eventButtons.forEach((btn) => {
+    this.#eventButtons?.forEach((btn) => {
       const btnEvent = this.#getButtonValue(btn, 'slide-event');
 
       let isActive = {
-        'toggle-control': this.keyControl,
-        'toggle-follow': this.followActive,
-        'toggle-fullscreen': this.fullScreen,
+        'key-control': this.keyControl,
+        'follow-active': this.followActive,
+        'full-screen': this.fullScreen,
       }
 
       if (Object.keys(isActive).includes(btnEvent)) {
@@ -459,49 +449,43 @@ class slideDeck extends HTMLElement {
     });
   }
 
+  // --------------------------------------------------------------------------
   // event handlers
-  #startPresenting = () => {
-    this.setAttribute('slide-view', 'solo');
+
+  reset = () => {
+    this.toSlide(1);
+  }
+
+  join = () => {
     this.setAttribute('key-control', '');
     this.setAttribute('follow-active', '');
   }
 
-  startEvent = () => {
-    this.goTo(1);
-    this.#startPresenting();
+  resume = () => {
+    this.setAttribute('slide-view', slideDeck.knownViews.public);
+    this.join();
   }
 
-  resumeEvent = () => {
-    this.goToSaved();
-    this.#startPresenting();
+  start = () => {
+    this.reset();
+    this.resume();
   }
 
-  resetEvent = () => {
-    this.goTo(1);
+  joinAsSpeaker = () => {
+    this.setAttribute('slide-view', slideDeck.knownViews.private);
+    this.join();
   }
 
-  joinWithNotesEvent = () => {
-    this.setAttribute('slide-view', 'script');
-    this.setAttribute('key-control', '');
-    this.setAttribute('follow-active', '');
-  }
-
-  joinEvent = () => {
-    this.setAttribute('key-control', '');
-    this.setAttribute('follow-active', '');
-  }
-
-  blankSlideEvent = (color) => {
+  blankSlide = (color) => {
     if (this.#blankSlide.open) {
       this.#blankSlide.close();
-      this.removeAttribute('blank-slide');
     } else {
       this.#blankSlide.showModal();
       this.setAttribute('blank-slide', color || 'black');
     }
   }
 
-  fullScreenEvent = () => {
+  toggleFullScreen = () => {
     this.toggleAttribute('full-screen');
 
     if (this.fullScreen && this.requestFullscreen) {
@@ -511,23 +495,40 @@ class slideDeck extends HTMLElement {
     }
   }
 
-  // dynamic attribute methods
-  #keyControlChange = () => {
+  toggleKeyControl = () => this.toggleAttribute('key-control');
+  toggleFollowActive = () => this.toggleAttribute('follow-active');
+
+  // --------------------------------------------------------------------------
+  // attribute-change methods
+
+  #onBlankSlideClosed = () => {
+    this.removeAttribute('blank-slide');
+  }
+
+  #onViewChange = () => {
+    this.#updateViewButtons();
+    this.scrollToActive();
+    sessionStorage.setItem(this.#store.view, this.slideView);
+  }
+
+  #onKeyControlChange = () => {
     if (this.keyControl) {
-      this.goToSaved();
+      this.toSavedSlide();
     }
   }
 
-  #followActiveChange = () => {
+  #onFollowActiveChange = () => {
     if (this.followActive) {
-      this.goToSaved();
-      window.addEventListener('storage', (e) => this.goToSaved());
+      this.toSavedSlide();
+      window.addEventListener('storage', (e) => this.toSavedSlide());
     } else {
-      window.removeEventListener('storage', (e) => this.goToSaved());
+      window.removeEventListener('storage', (e) => this.toSavedSlide());
     }
   }
 
+  // --------------------------------------------------------------------------
   // storage
+
   #asSlideInt = (string) => parseInt(string, 10);
   #indexFromId = (string) => this.#asSlideInt(string.split('-').pop());
 
@@ -544,6 +545,7 @@ class slideDeck extends HTMLElement {
       window.location.hash = this.#slideId(to);
     }
   };
+
   #slideToStore = (to) => {
     if (to) {
       localStorage.setItem(this.#store.slide, to);
@@ -552,7 +554,9 @@ class slideDeck extends HTMLElement {
     }
   };
 
-  // navigation
+  // --------------------------------------------------------------------------
+  // slide navigation
+
   #inRange = (slide) => slide >= 1 && slide <= this.slideCount;
   #getActive = () => this.#slideFromHash() || this.activeSlide;
 
@@ -564,7 +568,7 @@ class slideDeck extends HTMLElement {
     }
   };
 
-  goTo = (to) => {
+  toSlide = (to) => {
     const fromHash = this.#slideFromHash();
     const setTo = to || this.#getActive();
 
@@ -589,68 +593,119 @@ class slideDeck extends HTMLElement {
 
   move = (by) => {
     const to = (this.#getActive() || 0) + by;
-    this.goTo(to);
+    this.toSlide(to);
   };
 
-  goToSaved = () => {
-    this.goTo(this.#slideFromStore());
+  next = () => this.move(1);
+  previous = () => this.move(-1);
+
+  toSavedSlide = () => {
+    this.toSlide(this.#slideFromStore());
   }
+
+  // --------------------------------------------------------------------------
+  // keyboard control
 
   // Detect Ctrl / Cmd modifiers in a platform-agnostic way
   #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
 
-  #keyEventActions = (event) => {
-    // exit from blank slide
-    if (this.hasAttribute('blank-slide')) {
+  #escToBlur = (event) => {
+    if (event.key === 'Escape') {
       event.preventDefault();
-      this.removeAttribute('blank-slide');
+      event.target.blur();
+      return true;
+    }
+  }
+
+        const type = event.target.getAttribute('type')?.toLowerCase();
+    // it's only private if the focus is somewhere else
+    if (event.target === this.#body) { return; }
+
+    // esc to blur, anywhere
+    if (this.#escToBlur(event)) { return true; }
+
+    // anything in an iframe is private
+    if (event.target.ownerDocument !== document) { return true; }
+
+    // anything in contentEditable is private
+    if (event.target.getAttribute('contenteditable')) { return true; }
+
+    // scrollable elements are private
+    const overflowStyle = window
+      .getComputedStyle(event.target)
+      .getPropertyValue('overflow');
+    const hasOverflow = (event.target.scrollHeight > event.target.clientHeight
+      || event.target.scrollWidth > event.target.clientWidth);
+
+    if (hasOverflow && overflowStyle !== 'hidden') { return true; }
+
+    // most form inputs are private…
+    switch (event.target.tagName) {
+      case 'TEXTAREA':
+      case 'SELECT':
+      case 'SUMMARY':
+        return true;
+      case 'A':
+        return event.key === 'Enter';
+      case 'INPUT':
+        const clickOnly = ['button', 'checkbox'];
+        const type = event.target.getAttribute('type').toLowerCase();
+        if (!clickOnly.includes(type)) { return true; }
+        break;
+      default:
+        break;
+    }
+
+    // click events are private by default
+    if ([' ', 'Enter'].includes(event.key)) { return true; };
+
+    // todo:
+    // - tab panels and tree menus?
+    // - non-summary disclosures? (should use buttons)
+    // https://webaim.org/techniques/keyboard/
+  }
+
+  #bodyKeyEvents = (event) => {
+    // modal events
+    if (event.key === 'k' && this.#cmdOrCtrl(event)) {
+      event.preventDefault();
+      this.#controlPanel.open
+        ? this.#controlPanel.close()
+        : this.#controlPanel.showModal();
+    } else if (this.#controlPanel.open) {
+      this.#escToBlur(event) && this.#controlPanel.close();
+      return;
+    } else if (this.#blankSlide.open && !this.#cmdOrCtrl(event)) {
+      event.preventDefault();
+      this.blankSlide();
       return;
     }
 
-    // always available
-    if (this.#cmdOrCtrl(event)) {
-      switch (event.key) {
-        case 'k':
-          event.preventDefault();
-          this.#controlPanel.showModal();
-          break;
-        case 'Enter':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.startEvent();
-          } else {
-            event.preventDefault();
-            this.resumeEvent();
-          }
-          break;
-
-        default:
-          break;
+    // always available, quickstart
+    if (event.key === 'Enter') {
+      if (this.#cmdOrCtrl(event)) {
+        event.preventDefault();
+        event.shiftKey ? this.start(): this.resume();
+      } else if (event.altKey) {
+        event.preventDefault();
+        this.joinAsSpeaker();
       }
-      return;
-    } else if (event.altKey && event.key === 'Enter') {
-      event.preventDefault();
-      this.joinWithNotesEvent();
+
       return;
     }
 
     // only while key-control is active
     if (this.keyControl) {
-      if (event.key === 'Escape') {
-        if (event.target !== this.#body) {
-          event.target.blur();
-        }
-        return;
-      }
+      if (this.#isPrivateKeydown(event)) { return; }
 
       switch (slideDeck.controlKeys[event.key]) {
         case 'firstSlide':
           event.preventDefault();
-          this.goTo(1);
+          this.toSlide(1);
           break;
         case 'lastSlide':
           event.preventDefault();
-          this.goTo(this.slideCount);
+          this.toSlide(this.slideCount);
           break;
         case 'nextSlide':
           event.preventDefault();
@@ -662,11 +717,11 @@ class slideDeck extends HTMLElement {
           break;
         case 'blackOut':
           event.preventDefault();
-          this.blankSlideEvent('black');
+          this.blankSlide('black');
           break;
         case 'whiteOut':
           event.preventDefault();
-          this.blankSlideEvent('white');
+          this.blankSlide('white');
           break;
         default:
           break;

@@ -6,7 +6,7 @@ slide-deck {
 }
 
 [slide-view=grid],
-[slide-view=script] {
+[slide-view=speaker] {
   --slide-ratio: 16/9;
   --target-margin: var(--gap);
   --target-outline: medium dotted;
@@ -21,7 +21,7 @@ slide-deck {
   grid-template-columns: repeat(auto-fill, minmax(min(50ch, 100%), 1fr));
 }
 
-[slide-view=solo] {
+[slide-view=slideshow] {
   grid-auto-rows: 100svh;
 
   [slide-item='container'] {
@@ -37,7 +37,7 @@ slide-deck {
   }
 }
 
-[slide-view=script] {
+[slide-view=speaker] {
   --slide-canvas-border: var(--default-slide-border);
   --column-gap: calc(1.25em + 2vw);
   --row-gap: 5em;
