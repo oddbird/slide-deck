@@ -6,9 +6,28 @@ until we achieve a stable v1.0 release
 
 ## v0.2.0 - UNRELEASED
 
-- 💥 BREAKING: The component itself is only aware of two 'built-in' views,
-  named `slideshow` (used for `start` and `resume` events)
-  and `speaker` (used for the `join-as-speaker` event)
+- 🚀 NEW: All attributes have associated getters and setters:
+  - `key-control` -> `keyControl` (boolean)
+  - `follow-active` -> `followActive` (boolean)
+  - `full-screen` -> `fullScreen` (boolean)
+  - `slide-view` -> `slideView` (string)
+- 🚀 NEW: Use the `?slide-view=viewName` query parameter
+  to create links to specific slide views.
+  When present on load, the query parameter will override
+  the session storage as well as any hardcoded attribute value.
+- 💥 BREAKING: The `slideView` property setter
+  should be used for changing views,
+  rather than manipulating the `slide-view` attribute directly.
+  This will also update session storage and the url query parameter.
+- 💥 BREAKING: When the `start` and `resume` events are fired,
+  the slide-deck is put into a `publicView`
+  (the default is `slideshow`).
+  When the `join-as-speaker` event is fired,
+  the slide-deck is put into a `privateView`
+  (the default is `speaker`).
+  These can be changed by setting the
+  `publicView` and `privateView` properties with JS,
+  or by setting the `public-view` and `private-view` attributes in HTML.
 - 💥 BREAKING: Renamed the custom event handlers and matching public methods:
   - `reset` = `reset()`
   - `join` = `join()`
@@ -26,6 +45,8 @@ until we achieve a stable v1.0 release
   - `follow-active` = `toggleFollowActive()`
 - 🐞 FIXED: Keyboard events are given proper priority, so that
   (for example) you can open the control panel from a blank slide
+- 👀 INTERNAL: Renamed static `storageKeys` to `storeValues`,
+  and static `controlKeys` to `navKeys` for clarity.
 
 ## v0.1.4 - 2024-02-28
 
