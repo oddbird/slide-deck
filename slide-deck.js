@@ -240,7 +240,7 @@ class slideDeck extends HTMLElement {
     const params = this.urlParams;
     Object.keys(update).forEach((name) => { params.set(name, update[name]) });
     window.location.search = params;
-  }
+    window.location.search = params.toString();
 
   // views
   get publicView() {
