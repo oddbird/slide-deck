@@ -235,7 +235,8 @@ class slideDeck extends HTMLElement {
     return new URLSearchParams(window.location.search);
   }
 
-  set urlParams(update) {
+  // update individual parameters
+  updateUrlParams(update) {
     const params = this.urlParams;
     Object.keys(update).forEach((name) => { params.set(name, update[name]) });
     window.location.search = params;
@@ -266,7 +267,7 @@ class slideDeck extends HTMLElement {
   }
 
   set slideView(view) {
-    this.urlParams = {'slide-view': view};
+    this.updateUrlParams({'slide-view': view});
     this.setAttribute('slide-view', view);
     sessionStorage.setItem(this.#store.view, view);
   }
