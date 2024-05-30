@@ -239,7 +239,7 @@ class slideDeck extends HTMLElement {
   updateUrlParams(update) {
     const params = this.urlParams;
     Object.keys(update).forEach((name) => { params.set(name, update[name]) });
-    window.location.search = params.toString();
+    history.pushState({}, '', `?${params.toString()}`);
   }
 
   // views
@@ -267,7 +267,11 @@ class slideDeck extends HTMLElement {
   }
 
   set slideView(view) {
-    this.updateUrlParams({'slide-view': view});
+    // Don't update the URL if not needed, for instance after a back/forward
+    // navigation. Otherwise, we overwrite the forward history.
+    if (this.urlParams.get('slide-view') !== view) {
+      this.updateUrlParams({ 'slide-view': view });
+    }
     this.setAttribute('slide-view', view);
     sessionStorage.setItem(this.#store.view, view);
   }
@@ -342,11 +346,13 @@ class slideDeck extends HTMLElement {
     // events
     this.#body.addEventListener('keydown', this.#bodyKeyEvents);
     this.#blankSlide.addEventListener('close', this.#onBlankSlideClosed);
+    window.addEventListener('popstate', this.#syncViewOnLocationChange);
   }
 
   disconnectedCallback() {
     this.#body.removeEventListener('keydown', this.#bodyKeyEvents);
     this.#blankSlide.removeEventListener('close', this.#onBlankSlideClosed);
+    window.removeEventListener('popstate', this.#syncViewOnLocationChange);
   }
 
   // --------------------------------------------------------------------------
@@ -512,6 +518,13 @@ class slideDeck extends HTMLElement {
         this.#setButtonPressed(btn, isActive[btnEvent]);
       }
     });
+  }
+
+  #syncViewOnLocationChange = () => {
+    const queryView = this.urlParams.get('slide-view');
+    if (queryView && queryView !== this.getAttribute('slide-view')) {
+      this.slideView = this.urlParams.get('slide-view');
+    }
   }
 
   // --------------------------------------------------------------------------
