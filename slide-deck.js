@@ -143,27 +143,14 @@ class slideDeck extends HTMLElement {
     'slide-view',
   ];
 
-  get keyControl(){
-    return this.hasAttribute('key-control');
-  }
-  get followActive(){
-    return this.hasAttribute('follow-active');
-  }
-  get fullScreen(){
-    return this.hasAttribute('full-screen');
-  }
-  get slideView(){
-    return this.getAttribute('slide-view');
-  }
-
-  static storageKeys = [
+  static storeValues = [
     'control',
     'follow',
     'view',
     'slide',
   ];
 
-  static controlKeys = {
+  static navKeys = {
     'Home': 'firstSlide',
     'End': 'lastSlide',
 
@@ -191,16 +178,103 @@ class slideDeck extends HTMLElement {
   // --------------------------------------------------------------------------
   // dynamic properties
 
-  #store = {};
   slides;
   slideCount;
   activeSlide;
+
   #controlPanel;
   #blankSlide;
   #eventButtons;
   #viewButtons;
   #goToButtons;
   #body;
+  #store = {};
+
+  // --------------------------------------------------------------------------
+  // get 'n set
+
+  // attrs
+  get keyControl() {
+    return this.hasAttribute('key-control');
+  }
+
+  set keyControl(on) {
+    if (on) {
+      this.setAttribute('key-control', '');
+    } else {
+      this.removeAttribute('key-control');
+    }
+  }
+
+  get followActive() {
+    return this.hasAttribute('follow-active');
+  }
+
+  set followActive(on) {
+    if (on) {
+      this.setAttribute('follow-active', '');
+    } else {
+      this.removeAttribute('follow-active');
+    }
+  }
+
+  get fullScreen() {
+    return this.hasAttribute('full-screen');
+  }
+
+  set fullScreen(on) {
+    if (on) {
+      this.setAttribute('full-screen', '');
+    } else {
+      this.removeAttribute('full-screen');
+    }
+  }
+
+  // params
+  get urlParams() {
+    return new URLSearchParams(window.location.search);
+  }
+
+  // update individual parameters
+  updateUrlParams(update) {
+    const params = this.urlParams;
+    Object.keys(update).forEach((name) => { params.set(name, update[name]) });
+    history.pushState({}, '', `?${params.toString()}`);
+  }
+
+  // views
+  get publicView() {
+    return this.getAttribute('public-view') || slideDeck.knownViews.public;
+  }
+
+  set publicView(string) {
+    this.setAttribute('public-view', string);
+  }
+
+  get privateView() {
+    return this.getAttribute('private-view') || slideDeck.knownViews.private;
+  }
+
+  set privateView(string) {
+    this.setAttribute('private-view', string);
+  }
+
+  get slideView() {
+    return this.urlParams.get('slide-view')
+      || sessionStorage.getItem(this.#store.view)
+      || this.getAttribute('slide-view')
+      || this.publicView;
+  }
+
+  set slideView(view) {
+    // Don't update the URL if not needed, for instance after a back/forward
+    // navigation. Otherwise, we overwrite the forward history.
+    if (this.urlParams.get('slide-view') !== view) {
+      this.updateUrlParams({ 'slide-view': view });
+    }
+    this.setAttribute('slide-view', view);
+    sessionStorage.setItem(this.#store.view, view);
+  }
 
   // --------------------------------------------------------------------------
   // callbacks
@@ -272,11 +346,13 @@ class slideDeck extends HTMLElement {
     // events
     this.#body.addEventListener('keydown', this.#bodyKeyEvents);
     this.#blankSlide.addEventListener('close', this.#onBlankSlideClosed);
+    window.addEventListener('popstate', this.#syncViewOnLocationChange);
   }
 
   disconnectedCallback() {
     this.#body.removeEventListener('keydown', this.#bodyKeyEvents);
     this.#blankSlide.removeEventListener('close', this.#onBlankSlideClosed);
+    window.removeEventListener('popstate', this.#syncViewOnLocationChange);
   }
 
   // --------------------------------------------------------------------------
@@ -299,7 +375,7 @@ class slideDeck extends HTMLElement {
     this.id = this.id || this.#newDeckId();
 
     // storage keys based on slide ID
-    slideDeck.storageKeys.forEach((key) => {
+    slideDeck.storeValues.forEach((key) => {
       this.#store[key] = `${this.id}.${key}`;
     });
   }
@@ -336,12 +412,7 @@ class slideDeck extends HTMLElement {
 
   #defaultAttrs = () => {
     // view required
-    this.setAttribute(
-      'slide-view',
-      sessionStorage.getItem(this.#store.view)
-        || this.slideView
-        || slideDeck.knownViews.public
-    );
+    this.setAttribute('slide-view', this.slideView);
 
     // fullscreen must be set by user interaction
     this.removeAttribute('full-screen');
@@ -407,7 +478,7 @@ class slideDeck extends HTMLElement {
 
     this.#viewButtons.forEach((btn) => {
       btn.addEventListener('click', (e) => {
-        this.setAttribute('slide-view', this.#getButtonValue(btn, 'set-view'));
+        this.slideView = this.#getButtonValue(btn, 'set-view');
       });
       this.#setButtonToggleState(btn, 'set-view', this.slideView);
     });
@@ -449,6 +520,13 @@ class slideDeck extends HTMLElement {
     });
   }
 
+  #syncViewOnLocationChange = () => {
+    const queryView = this.urlParams.get('slide-view');
+    if (queryView && queryView !== this.getAttribute('slide-view')) {
+      this.slideView = this.urlParams.get('slide-view');
+    }
+  }
+
   // --------------------------------------------------------------------------
   // event handlers
 
@@ -457,12 +535,12 @@ class slideDeck extends HTMLElement {
   }
 
   join = () => {
-    this.setAttribute('key-control', '');
-    this.setAttribute('follow-active', '');
+    this.keyControl = true;
+    this.followActive = true;
   }
 
   resume = () => {
-    this.setAttribute('slide-view', slideDeck.knownViews.public);
+    this.slideView = this.publicView;
     this.join();
   }
 
@@ -472,7 +550,7 @@ class slideDeck extends HTMLElement {
   }
 
   joinAsSpeaker = () => {
-    this.setAttribute('slide-view', slideDeck.knownViews.private);
+    this.slideView = this.privateView;
     this.join();
   }
 
@@ -506,9 +584,8 @@ class slideDeck extends HTMLElement {
   }
 
   #onViewChange = () => {
-    this.#updateViewButtons();
     this.scrollToActive();
-    sessionStorage.setItem(this.#store.view, this.slideView);
+    this.#updateViewButtons();
   }
 
   #onKeyControlChange = () => {
@@ -698,7 +775,7 @@ class slideDeck extends HTMLElement {
     if (this.keyControl) {
       if (this.#isPrivateKeydown(event)) { return; }
 
-      switch (slideDeck.controlKeys[event.key]) {
+      switch (slideDeck.navKeys[event.key]) {
         case 'firstSlide':
           event.preventDefault();
           this.toSlide(1);
