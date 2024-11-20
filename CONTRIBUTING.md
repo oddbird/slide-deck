@@ -18,9 +18,19 @@ for testing, run:
 
 ```
 # command line
-npm start
+npm run serve
 ```
 
 Then go to
-http://localhost:8080/
+http://localhost:6000/
 in a web browser.
+
+If
+[localias](https://github.com/peterldowns/localias?tab=readme-ov-file#-localias)
+is configured and running, add an alias for this project:
+
+```
+localias set slide-deck.local 6000
+```
+
+This will allow you to visit the project at <https://slide-deck.local>.
