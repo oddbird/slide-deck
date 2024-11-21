@@ -696,7 +696,7 @@ class slideDeck extends HTMLElement {
   #nearestKeyControl = (el) => {
     const ancestor = el.closest('[key-control]');
 
-    return this.#keyControl(el) || this.#keyControl(ancestor);
+    return this.#keyControl(ancestor);
   }
 
   // Detect Ctrl / Cmd modifiers in a platform-agnostic way
@@ -754,7 +754,7 @@ class slideDeck extends HTMLElement {
     }
 
     // click events are private by default
-    if ([' ', 'Enter'].includes(event.key)) return true;;
+    if ([' ', 'Enter'].includes(event.key)) return true;
 
     // todo:
     // - tab panels and tree menus?
