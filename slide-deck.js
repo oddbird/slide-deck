@@ -194,13 +194,11 @@ class slideDeck extends HTMLElement {
   // get 'n set
 
   // attrs
-  get keyControl() {
-    return this.hasAttribute('key-control');
-  }
+  get keyControl() { return this.#keyControl(this); }
 
   set keyControl(on) {
     if (on) {
-      this.setAttribute('key-control', '');
+      this.setAttribute('key-control', on);
     } else {
       this.removeAttribute('key-control');
     }
@@ -683,6 +681,24 @@ class slideDeck extends HTMLElement {
   // --------------------------------------------------------------------------
   // keyboard control
 
+  // Get the keyControl value of an element
+  #keyControl = (el) => {
+    if (!el) return false;
+    if (!el.hasAttribute('key-control')) return false;
+
+    const controlValue = el.getAttribute('key-control');
+    const trueValues = ['true', '', 'key-control'];
+    if (trueValues.includes(controlValue)) return true;
+
+    return controlValue;
+  }
+
+  #nearestKeyControl = (el) => {
+    const ancestor = el.closest('[key-control]');
+
+    return this.#keyControl(ancestor);
+  }
+
   // Detect Ctrl / Cmd modifiers in a platform-agnostic way
   #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
 
@@ -696,16 +712,20 @@ class slideDeck extends HTMLElement {
 
   #isPrivateKeydown = (event) => {
     // it's only private if the focus is somewhere else
-    if (event.target === this.#body) { return; }
+    if (event.target === this.#body) return;
+
+    const controlSetting = this.#nearestKeyControl(event.target);
+    if (['none', 'false'].includes(controlSetting)) return true;
 
     // esc to blur, anywhere
-    if (this.#escToBlur(event)) { return true; }
+    if (this.#escToBlur(event)) return true;
+    if (controlSetting === 'escape') return true;
 
     // anything in an iframe is private
-    if (event.target.ownerDocument !== document) { return true; }
+    if (event.target.ownerDocument !== document) return true;
 
     // anything in contentEditable is private
-    if (event.target.getAttribute('contenteditable')) { return true; }
+    if (event.target.getAttribute('contenteditable')) return true;
 
     // scrollable elements are private
     const overflowStyle = window
@@ -714,7 +734,7 @@ class slideDeck extends HTMLElement {
     const hasOverflow = (event.target.scrollHeight > event.target.clientHeight
       || event.target.scrollWidth > event.target.clientWidth);
 
-    if (hasOverflow && overflowStyle !== 'hidden') { return true; }
+    if (hasOverflow && overflowStyle !== 'hidden') return true;
 
     // most form inputs are private…
     switch (event.target.tagName) {
@@ -727,14 +747,14 @@ class slideDeck extends HTMLElement {
       case 'INPUT':
         const clickOnly = ['button', 'checkbox'];
         const type = event.target.getAttribute('type').toLowerCase();
-        if (!clickOnly.includes(type)) { return true; }
+        if (!clickOnly.includes(type)) return true;
         break;
       default:
         break;
     }
 
     // click events are private by default
-    if ([' ', 'Enter'].includes(event.key)) { return true; };
+    if ([' ', 'Enter'].includes(event.key)) return true;
 
     // todo:
     // - tab panels and tree menus?
@@ -773,7 +793,7 @@ class slideDeck extends HTMLElement {
 
     // only while key-control is active
     if (this.keyControl) {
-      if (this.#isPrivateKeydown(event)) { return; }
+      if (this.#isPrivateKeydown(event)) return;
 
       switch (slideDeck.navKeys[event.key]) {
         case 'firstSlide':

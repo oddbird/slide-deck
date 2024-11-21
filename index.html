@@ -208,6 +208,28 @@
         </div>
       </div>
       <div>
+        <div slide-canvas>
+          <div key-control="none">
+            <label for="focus-trap">no key controls while focused</label>
+            <input id="focus-trap" type="text">
+          </div>
+          <div key-control="escape">
+            <label for="focus-trap-escape">only blur while focused</label>
+            <input id="focus-trap-escape" type="text">
+          </div>
+        </div>
+        <div slide-note>
+          <p>
+            Set the <code>key-control</code>
+            to <code>none</code> or <code>escape</code>
+            on nested elements,
+            to turn off navigation controls
+            while focus is on parts of a slide
+            (like form controls or links).
+          </p>
+        </div>
+      </div>
+      <div>
         <h2>Works with Presentation Remotes</h2>
         <p>
           (at least the ones we've tested -
