@@ -6,6 +6,7 @@ until we achieve a stable v1.0 release
 
 ## v0.2.0 - UNRELEASED
 
+- 🚀 NEW: Provide a `slide-deck.webc` component.
 - 🚀 NEW: All attributes have associated getters and setters:
   - `key-control` -> `keyControl` (boolean)
   - `follow-active` -> `followActive` (boolean)
