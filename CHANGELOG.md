@@ -4,7 +4,7 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.2.0 - UNRELEASED
+## v0.2.0 - UNRELEASED (`-rc.1` 2024-11-21)
 
 - 🚀 NEW: The `key-control` attribute
   accepts values of `none` or `escape`,
