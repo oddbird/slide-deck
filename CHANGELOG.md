@@ -13,6 +13,7 @@ until we achieve a stable v1.0 release
   This attribute can be applied to individual elements in a deck,
   for more detailed control --
   eg turning off navigation while a form has focus.
+- 🚀 NEW: Provide a `slide-deck.webc` component.
 - 🚀 NEW: All attributes have associated getters and setters:
   - `key-control` -> `keyControl` (boolean | 'none' | 'escape')
   - `follow-active` -> `followActive` (boolean)
