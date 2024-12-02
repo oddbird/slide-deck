@@ -52,7 +52,9 @@ until we achieve a stable v1.0 release
   - `key-control` = `toggleKeyControl()`
   - `follow-active` = `toggleFollowActive()`
 - 🐞 FIXED: Keyboard events are given proper priority, so that
-  (for example) you can open the control panel from a blank slide
+  (for example) you can open the control panel from a blank slide.
+- 🐞 FIXED: Navigation shortcuts aren't invoked
+  when a modifier key is being pressed.
 - 👀 INTERNAL: Renamed static `storageKeys` to `storeValues`,
   and static `controlKeys` to `navKeys` for clarity.
 

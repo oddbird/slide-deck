@@ -702,6 +702,15 @@ class slideDeck extends HTMLElement {
   // Detect Ctrl / Cmd modifiers in a platform-agnostic way
   #cmdOrCtrl = (event) => event.ctrlKey || event.metaKey;
 
+  #isModified = (event) => this.#cmdOrCtrl(event)
+    || event.getModifierState("Shift")
+    || event.getModifierState("Alt")
+    || event.getModifierState("Meta")
+    || event.getModifierState("Fn")
+    || event.getModifierState("Hyper")
+    || event.getModifierState("OS")
+    || event.getModifierState("Super");
+
   #escToBlur = (event) => {
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -790,6 +799,9 @@ class slideDeck extends HTMLElement {
 
       return;
     }
+
+    // don't continue if modifiers are pressed
+    if (this.#isModified(event)) return;
 
     // only while key-control is active
     if (this.keyControl) {
