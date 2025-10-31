@@ -4,7 +4,7 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.2.0 - UNRELEASED (`-rc.2` 2025-04-23)
+## v0.2.0 - 2025-10-31
 
 - 🚀 NEW: The `key-control` attribute
   accepts values of `none` or `escape`,
@@ -55,6 +55,12 @@ until we achieve a stable v1.0 release
   (for example) you can open the control panel from a blank slide.
 - 🐞 FIXED: Navigation shortcuts aren't invoked
   when a modifier key is being pressed.
+- 🐞 FIXED: Slideshow view maintains `16/9` slide ratio
+  when in portrait orientation.
+- 🚀 NEW: `--slide-active-id` contains the id of the currently active slide.
+- 🚀 NEW: `--slide-deck-progress` is a percentage based on the current active slide.
+- 💥 BREAKING: Renamed some of the `slide-deck.css` custom properties,
+  and made minor changes to the styles (especially sizing/spacing).
 - 👀 INTERNAL: Renamed static `storageKeys` to `storeValues`,
   and static `controlKeys` to `navKeys` for clarity.
 

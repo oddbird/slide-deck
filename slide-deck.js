@@ -650,6 +650,7 @@ class slideDeck extends HTMLElement {
     if (setTo && this.#inRange(setTo)) {
       this.activeSlide = setTo;
       this.#slideToStore(setTo);
+      this.style.setProperty('--slide-active-id', setTo);
 
       if (setTo !== fromHash) {
         this.#slideToHash(setTo);
