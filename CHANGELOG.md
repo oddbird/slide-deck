@@ -4,6 +4,12 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
+## v0.2.1 - UNRELEASED
+
+- 🚀 NEW: The `control-panel` event
+  and `toggleControlPanel()` public method
+  make it easies to trigger the control panel externally.
+
 ## v0.2.0 - 2025-10-31
 
 - 🚀 NEW: The `key-control` attribute

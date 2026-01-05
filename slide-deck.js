@@ -308,6 +308,7 @@ class slideDeck extends HTMLElement {
     this.addEventListener('key-control', this.toggleKeyControl);
     this.addEventListener('follow-active', this.toggleFollowActive);
     this.addEventListener('full-screen', this.toggleFullScreen);
+    this.addEventListener('control-panel', this.toggleControlPanel);
 
     this.addEventListener('join', this.join);
     this.addEventListener('start', this.start);
@@ -344,12 +345,14 @@ class slideDeck extends HTMLElement {
     // events
     this.#body.addEventListener('keydown', this.#bodyKeyEvents);
     this.#blankSlide.addEventListener('close', this.#onBlankSlideClosed);
+    this.#controlPanel.addEventListener('close', this.#onControlPanelClosed);
     window.addEventListener('popstate', this.#syncViewOnLocationChange);
   }
 
   disconnectedCallback() {
     this.#body.removeEventListener('keydown', this.#bodyKeyEvents);
     this.#blankSlide.removeEventListener('close', this.#onBlankSlideClosed);
+    this.#controlPanel.removeEventListener('close', this.#onControlPanelClosed);
     window.removeEventListener('popstate', this.#syncViewOnLocationChange);
   }
 
@@ -510,6 +513,7 @@ class slideDeck extends HTMLElement {
         'key-control': this.keyControl,
         'follow-active': this.followActive,
         'full-screen': this.fullScreen,
+        'control-panel': this.#controlPanel.open,
       }
 
       if (Object.keys(isActive).includes(btnEvent)) {
@@ -574,11 +578,24 @@ class slideDeck extends HTMLElement {
   toggleKeyControl = () => this.toggleAttribute('key-control');
   toggleFollowActive = () => this.toggleAttribute('follow-active');
 
+  toggleControlPanel = () => {
+    if (this.#controlPanel.open) {
+      this.#controlPanel.close();
+    } else {
+      this.#controlPanel.showModal();
+      this.#updateEventButtons();
+    }
+  };
+
   // --------------------------------------------------------------------------
   // attribute-change methods
 
   #onBlankSlideClosed = () => {
     this.removeAttribute('blank-slide');
+  }
+
+  #onControlPanelClosed = () => {
+    this.#updateEventButtons();
   }
 
   #onViewChange = () => {
@@ -776,9 +793,7 @@ class slideDeck extends HTMLElement {
     // modal events
     if (event.key === 'k' && this.#cmdOrCtrl(event)) {
       event.preventDefault();
-      this.#controlPanel.open
-        ? this.#controlPanel.close()
-        : this.#controlPanel.showModal();
+      this.toggleControlPanel();
     } else if (this.#controlPanel.open) {
       this.#escToBlur(event) && this.#controlPanel.close();
       return;
