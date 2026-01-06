@@ -4,7 +4,7 @@
 Breaking changes will be allowed in minor versions
 until we achieve a stable v1.0 release
 
-## v0.2.1 - UNRELEASED
+## v0.2.1 - 2026-01-06
 
 - 🚀 NEW: The `control-panel` event
   and `toggleControlPanel()` public method
