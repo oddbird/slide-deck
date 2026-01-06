@@ -8,7 +8,7 @@ until we achieve a stable v1.0 release
 
 - 🚀 NEW: The `control-panel` event
   and `toggleControlPanel()` public method
-  make it easies to trigger the control panel externally.
+  make it easier to trigger the control panel externally.
 
 ## v0.2.0 - 2025-10-31
 
