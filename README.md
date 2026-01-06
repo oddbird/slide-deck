@@ -95,6 +95,37 @@ When presenting (`key-control` is active):
 These are based on
 the [PowerPoint shortcuts](https://support.microsoft.com/en-us/office/use-keyboard-shortcuts-to-deliver-powerpoint-presentations-1524ffce-bd2a-45f4-9a7f-f18b992b93a0#bkmk_frequent_macos).
 
+## Custom Events & Public Methods
+
+- `key-control`/`toggleKeyControl()`: toggle keyboard navigation shortcuts
+- `follow-active`/`toggleFollowActive()`: follow along with the
+  active slide saved in `localStorage` (for linking across multiple tabs)
+- `control-panel`/`toggleControlPanel()`: toggle the control panel
+- `reset`/`reset()`: go to the first slide
+- `join`/`join()`: turn on _keyboard control_, and _follow active_ slides
+- `resume`/`resume()`: _join_ in public (slideshow) view
+- `start`/`start()`: _reset_, and then _resume_
+- `join-as-speaker`/`joinAsSpeaker()`: _join_ in private (speaker) view
+- `blank-slide`/`blankSlide()`: toggle the `white` or `black`
+  blank slide overlay
+- `next`/`next()`: go to the next slide
+- `previous`/`previous()`: go to the previous slide
+- `to-slide`/`toSlide()`: go to a specific slide
+- `to-saved`/`toSavedSlide()`: go to the active slide saved in `localStorage`
+- `scroll-to-active`/`scrollToActive()`: scroll the active slide into view
+- `full-screen`/`toggleFullScreen()`: toggle fullscreen mode
+
+Add the `slide-event`, `to-slide`, or `set-view` attributes
+to any `<button>` element in a slide deck
+for quick control of these events:
+
+```html
+<button slide-view="speaker">speaker view</button>
+<button slide-event="next">go to the next slide</button>
+<button slide-event="control-panel">toggle the control panel</button>
+<button to-slide="6">go to slide number six</button>
+```
+
 ## Installation
 
 You have a few options (choose one of these):
